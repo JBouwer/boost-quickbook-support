@@ -1,0 +1,83 @@
+[article VSCodeExtension_Quickbook.test
+    [id ArugiUtils.Xperimental & Archive.VSCodeExtension_Quickbook.test]
+    [quickbook 1.7]
+]
+
+[/
+    ArugiUtils/Xperimental & Archive/VSCodeExtension_Quickbook.test.qbk
+    ArugiUtils
+
+    Created by Jan Bouwer on 23 August 2019.
+    Copyright (c) 2019 Jan Bouwer. All rights reserved.
+    
+    A Quickbook documentation file.
+    See 'http://www.boost.org/doc/html/quickbook.html' for more.
+]
+
+[import ../../ArugiUtils/Documentation/Macros.qbk]
+
+def "string" abc 'sdfds' asda
+
+Returns a range of bytes (optionally signed or unsigned) from a single type instance.
+
+[warning `ByteRange` is not portable across platforms, just as `void*` is not portable across platforms. `ByteRange` merely provides a convenient ['C++'ism] for the popular C idiom.]
+
+`code` abc `def`
+// abc
+*iuty* abc _def_ hdfgsd =hgsadf= /abc/ /def
+def/
+
+[*abc]
+['def]
+[_ghi]
+[^jkl]
+[-mnop]
+
+`abc
+def`
+
+[section Synopsis]
+[Synopsis_VSCodeExtension_Quickbook.test]
+[endsect]
+
+[section Examples]
+The range is equivalent to the open range
+``[ (byte*)&value, (byte*)&value + sizeof(value) )``
+where byte is a `char`, optionally `signed` or `unsigned`, and value is an instance
+of any other type that can have its address taken.
+
+Use the `byteRange<Sign>(type)` factory function to create instances on the fly.
+
+`Sign` can be `void`(default), `signed` or `unsigned`,
+which maps to `char`, `signed char` or `unsigned char` accordingly.
+
+An overloaded `operator<<` function provides a hexadecimal dump of the value.
+[endsect]
+
+[section Usage]
+[table
+[[Heading 1][Heading 2] [Heading 3]]
+[ [Row1 Col1][Row1 Col2] [Row1 Col3]]
+[[Row2 Col1] [Row2 \[Col2][Row2 Col3] ]
+[[Row3 Col1] [Row3 Col2 -\]][Row3 Col3]]
+]
+
+[endsect]
+
+[section Files]
+The implementation comprises of the following files:
+
+* [sourceFile ArugiUtils/Xperimental & Archive/VSCodeExtension_Quickbook.test.fwd.hpp] [emdash] Include header with [ref_fwddecl_ref]s.
+* [sourceFile ArugiUtils/Xperimental & Archive/VSCodeExtension_Quickbook.test.hpp] [emdash] Include header with [ref_decl_ref]s.
+* [sourceFile ArugiUtils/Xperimental & Archive/VSCodeExtension_Quickbook.test.hxx] [emdash] Include header with ['inline] & ['template [ref_def_ref]s].
+* [sourceFile ArugiUtils/Xperimental & Archive/VSCodeExtension_Quickbook.test.cpp] [emdash] [link ref.rootsourcefile Root source file] for linking.
+
+[heading Documentation files]
+* [sourceFile ArugiUtils/Xperimental & Archive/VSCodeExtension_Quickbook.test.documentation.cpp] [emdash] [link ref.rootsourcefile Root source file] for testing & documentation examples.
+* [sourceFile ArugiUtils/Xperimental & Archive/VSCodeExtension_Quickbook.test.qbk] [emdash] [link_quickbook] documentation file.
+
+[heading Unit test files]
+* [sourceFile ArugiUtils/Tests/Xperimental & Archive/VSCodeExtension_Quickbook.test.test.hpp] [emdash] Include header with /unit test/ [ref_decl_ref]s.
+* [sourceFile ArugiUtils/Tests/Xperimental & Archive/VSCodeExtension_Quickbook.test.test.cpp] [emdash] [link ref.rootsourcefile Root source file] for /unit test/ linking.
+
+[endsect]

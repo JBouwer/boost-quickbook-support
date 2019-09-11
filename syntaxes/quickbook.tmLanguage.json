@@ -1,0 +1,263 @@
+{
+    "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+    "name": "Boost Quickbook",
+    "scopeName": "source.quickbook",
+    "patterns": [
+                {
+                    "include": "#phrase"
+                }
+    ],
+    "repository": {
+        "escapeTemplate": {
+            "name": "constant.character.escape.escapeTemplate.quickbook",
+            "match": "\\\\."
+        },
+        "commentTemplate": {
+            "name": "comment.quickbook",
+            "begin": "\\[\\/",
+            "end": "\\]"
+        },
+        "imageTemplate": {
+            "name": "keyword.imageTemplate.quickbook",
+            "match": "\\[\\$(.*?)\\]",
+            "captures": {
+                "1": { "name": "markup.underline.link.imageTemplate.quickbook" }
+            }
+        },
+        "boldTemplate": {
+            "begin": "(\\[\\*)",
+            "end": "(\\])",
+            "captures": {
+                "1": { "name": "keyword.control.boldTemplate.quickbook" }
+            },
+            "contentName": "markup.bold.boldTemplate.quickbook",
+            "patterns": [
+                {
+                    "include": "#phrase"
+                }
+            ]
+        },
+        "italicTemplate": {
+            "begin": "(\\[\\')",
+            "end": "(\\])",
+            "captures": {
+                "1": { "name": "keyword.control.italicTemplate.quickbook" }
+            },
+            "contentName": "markup.italic.italicTemplate.quickbook",
+            "patterns": [
+                {
+                    "include": "#phrase"
+                }
+            ]
+        },
+        "underlineTemplate": {
+            "begin": "(\\[\\_)",
+            "end": "(\\])",
+            "captures": {
+                "1": { "name": "keyword.control.underlineTemplate.quickbook" }
+            },
+            "contentName": "markup.underline.underlineTemplate.quickbook",
+            "patterns": [
+                {
+                    "include": "#phrase"
+                }
+            ]
+        },
+        "teletypeTemplate": {
+            "begin": "(\\[\\^)",
+            "end": "(\\])",
+            "captures": {
+                "1": { "name": "keyword.control.teletypeTemplate.quickbook" }
+            },
+            "contentName": "markup.raw.teletypeTemplate.quickbook",
+            "patterns": [
+                {
+                    "include": "#phrase"
+                }
+            ]
+        },
+        "strikethroughTemplate": {
+            "begin": "(\\[\\-)",
+            "end": "(\\])",
+            "captures": {
+                "1": { "name": "keyword.control.strikethroughTemplate.quickbook" }
+            },
+            "contentName": "markup.other.strikethroughTemplate.quickbook",
+            "patterns": [
+                {
+                    "include": "#phrase"
+                }
+            ]
+        },
+        "simpleBold": {
+            "name": "entity.other.simpleBold.quickbook",
+            "begin": "\\*((?:[^\\*\\/\\_\\=\\]](?!\\n\\n))*)(?=\\*[\\s|[:punct:]]+)",
+            "end": "\\*(?=[\\s|[:punct:]]+)",
+            "captures": {
+                "1": { "name": "markup.bold.simpleBold.quickbook" }
+            }
+        },
+        "simpleItalic": {
+            "name": "entity.other.simpleItalic.quickbook",
+            "begin": "\\/((?:[^\\*\\/\\_\\=\\]](?!\\n\\n))*)(?=\\/[\\s|[:punct:]]+)",
+            "end": "\\/(?=[\\s|[:punct:]]+)",
+            "captures": {
+                "1": { "name": "markup.italic.simpleItalic.quickbook" }
+            }
+        },
+        "simpleUnderline": {
+            "name": "entity.other.simpleUnderline.quickbook",
+            "begin": "\\_((?:[^\\*\\/\\_\\=\\]](?!\\n\\n))*)(?=\\_[\\s|[:punct:]]+)",
+            "end": "\\_(?=[\\s|[:punct:]]+)",
+            "captures": {
+                "1": { "name": "markup.underline.simpleUnderline.quickbook" }
+            }
+        },
+        "simpleTeletype": {
+            "name": "entity.other.simpleTeletype.quickbook",
+            "begin": "\\=((?:[^\\*\\/\\_\\=\\]](?!\\n\\n))*)(?=\\=[\\s|[:punct:]]+)",
+            "end": "\\=(?=[\\s|[:punct:]]+)",
+            "captures": {
+                "1": { "name": "markup.raw.simpleTeletype.quickbook" }
+            }
+        },
+        "simpleCode": {
+            "name": "entity.other.simpleCode.quickbook",
+            "begin": "\\`((?:[^\\`](?!\\n\\n))*)(?=\\`[\\s|[:punct:]]+)",
+            "end": "\\`(?=[\\s|[:punct:]]+)",
+            "captures": {
+                "1": { "name": "markup.inline.raw.simpleCode.quickbook" }
+            }
+        },
+        "templateDefinition": {
+            "name": "meta.function.templateDefinition.quickbook",
+            "begin": "(\\[template)\\s+(\\w+)\\[((?:\\w+)?(?:\\s+(?:\\w+)?)*)\\]",
+            "end": "(\\])",
+            "beginCaptures": {
+                "1": { "name": "storage.type.templateExpansion.quickbook" },
+                "2": { "name": "entity.name.function.templateDefinition.quickbook" },
+                "3": { "name": "variable.parameter.templateDefinition.block.quickbook" }
+            },
+            "endCaptures": {
+                "1": { "name": "storage.type.templateExpansion.quickbook" }
+            },
+            "patterns": [
+                {
+                    "include": "#phrase"
+                }
+            ]
+        },
+        "nullaryTemplateExpansion": {
+            "name": "keyword.control.nullaryTemplateExpansion.quickbook",
+            "match": "\\[(\\w+)\\]",
+            "captures": {
+                "1": { "name": "entity.name.function.nullaryTemplateExpansion.quickbook" }
+            }
+        },
+        "templateExpansion": {
+            "name": "meta.source.templateExpansion.quickbook",
+            "begin": "(\\[)(\\S+)",
+            "end": "(\\])",
+            "beginCaptures": {
+                "1": { "name": "keyword.control.templateExpansion.quickbook" },
+                "2": { "name": "entity.name.function.TemplateExpansion.quickbook" }
+            },
+            "endCaptures": {
+                "1": { "name": "keyword.control.templateExpansion.quickbook" }
+            },
+            "patterns": [
+                {
+                    "include": "#phrase"
+                }
+            ]
+        },
+        "codeBlock": {
+            "name": "markup.raw.codeBlock.quickbook",
+            "begin": "(\\`\\`\\`|\\`\\`)",
+            "end": "(\\1)",
+            "beginCaptures": {
+                "1": { "name": "string.other.open.codeBlock.quickbook" }
+            },
+            "endCaptures": {
+                "1": { "name": "string.other.close.codeBlock.quickbook" }
+            },
+            "patterns": [
+                {
+                    "include": "#escapeBackToQuickbook"
+                }
+            ]
+        },
+        "escapeBackToQuickbook": {
+            "name": "meta.source.escapeBackToQuickbook.quickbook",
+            "begin": "(\\`\\`)",
+            "end": "(\\`\\`)",
+            "beginCaptures": {
+                "1": { "name": "string.other.open.escapeBackToQuickbook.quickbook" }
+            },
+            "endCaptures": {
+                "1": { "name": "string.other.close.escapeBackToQuickbook.quickbook" }
+            },
+            "patterns": [
+                {
+                    "include": "#phrase"
+                }
+            ]
+        },
+        "phrase": {
+            "name": "phrase.block.quickbook",
+            "patterns": [
+                {
+                    "include": "#escapeTemplate"
+                },
+                {
+                    "include": "#commentTemplate"
+                },
+                {
+                    "include": "#imageTemplate"
+                },
+                {
+                    "include": "#boldTemplate"
+                },
+                {
+                    "include": "#italicTemplate"
+                },
+                {
+                    "include": "#underlineTemplate"
+                },
+                {
+                    "include": "#teletypeTemplate"
+                },
+                {
+                    "include": "#strikethroughTemplate"
+                },
+                {
+                    "include": "#templateDefinition"
+                },
+                {
+                    "include": "#nullaryTemplateExpansion"
+                },
+                {
+                    "include": "#templateExpansion"
+                },
+                {
+                    "include": "#codeBlock"
+                },
+                {
+                    "include": "#simpleBold"
+                },
+                {
+                    "include": "#simpleItalic"
+                },
+                {
+                    "include": "#simpleUnderline"
+                },
+                {
+                    "include": "#simpleTeletype"
+                },
+                {
+                    "include": "#simpleCode"
+                }
+            ]
+        }
+    }
+}
