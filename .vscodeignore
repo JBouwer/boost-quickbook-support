@@ -1,4 +1,8 @@
+**/*.vsix
+**/*.ts
+**/tsconfig.json
 .vscode/**
 .vscode-test/**
 .gitignore
+images/*.svg
 vsc-extension-quickstart.md

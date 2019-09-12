@@ -1,10 +1,11 @@
 {
     "name": "boost-quickbook-support",
     "publisher": "JBouwer",
-    "displayName": "Boost Quickbook",
+    "displayName": "Boost Quickbook Support",
     "description": "Syntax highlighting & simple preview for Boost Quickbook",
     "license": "BSL-1.0",
-    "version": "0.0.1",
+    "icon": "images/boost-quickbook-support.png",
+    "version": "0.0.2",
     "engines": {
         "vscode": "^1.37.0"
     },
@@ -21,7 +22,7 @@
     "main": "./out/extension",
     "contributes": {
         "configuration": {
-            "title": "Boost Quickbook",
+            "title": "Boost Quickbook Support",
             "properties": {
                 "quickbook.preview.pathToExecutable": {
                     "type": "string",

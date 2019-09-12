@@ -5,7 +5,11 @@
     Check http://keepachangelog.com for recommendations on how to structure this file.
 )
 
-## [Unreleased]
+[//]: # (
+    ## [Unreleased]
+)
+## 0.0.2
+- Minor documentation & naming issues fixed.
 
 ## 0.0.1
 - Initial release

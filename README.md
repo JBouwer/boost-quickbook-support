@@ -1,15 +1,17 @@
-# Boost Quickbook Extension
+# Boost Quickbook Support Extension
 
 From the [Boost.Quickbook](http://www.boost.org/doc/html/quickbook.html) website:
 > QuickBook is a WikiWiki style documentation tool geared towards C++ documentation using simple rules and markup for simple formatting tasks. 
 
-This VSCode extension provide some simple language support to ease the task of authoring quickbook (source)files.
+This [Visual Studio Code](https://code.visualstudio.com/) extension provide some simple language support to ease the task of authoring [Boost.Quickbook](http://www.boost.org/doc/html/quickbook.html)(source) files.
 
 It is *not* endorsed, published, approved or peer-reviewed by the [Boost](https://boost.org) community,
 or anybody represented by the community. I have simply written it for myself to use - and put it out in the ether in case somebody else may find it useful too.
 
 It is called "Boost Quickbook Support" because *Quickbook* is a [Boost](https://boost.org)-published language/tool,
 and when I google "Quickbook" on its own, the search engine assumes I mean accounting software.
+
+- The GitHub repository lives here: [github.com/JBouwer/boost-quickbook-support](https://github.com/JBouwer/boost-quickbook-support)
 
 ## Features
 
@@ -43,6 +45,7 @@ These settings are processed as follows:
 This extension is not bullet proof. It is only intended as the next step up from a pure text editor - not as a *complete documentation writing tool*.
 
 Currently it suffers from the following caveats.
+See the [GitHub Issues Page](https://github.com/JBouwer/boost-quickbook-support/issues) for more.
 
 - Bracket & Quote matching does *not* recognise escaped characters:
 e.g.  
@@ -57,16 +60,20 @@ e.g.
 - The *preview* panel does not correctly display graphics/images etc.
     #### Explanation
     The *preview* is simply generated with the `quickbook --output-format onehtml ...` option.  
-    As [Visual Studio Code](http://code.visualstudio.com) is rightly security concious, the
+    As [Visual Studio Code](http://code.visualstudio.com) is rightly security conscious, the
     [WebView](https://code.visualstudio.com/api/extension-guides/webview) 
     that I use to display the preview does not have access to local resources outside of the `vscode-resource:` schema.  
     Personally I'm fine with that - a quick preview of the document-structure and presentation is all I wanted.  
     It may be possible to post-process the generated HTML in order to change the schema, but in my opinion it kind of defies the purpose of the extension.
     
-    See https://code.visualstudio.com/api/extension-guides/webview#loading-local-content for more on this subject.
+    See [WebView API documentation](https://code.visualstudio.com/api/extension-guides/webview#loading-local-content) for more on this subject.
+
 
 
 ## Release Notes
+
+### 0.0.2
+- Minor documentation & naming issues fixed.
 
 ### 0.0.1
 
