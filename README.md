@@ -18,7 +18,7 @@ and when I google "Quickbook" on its own, the search engine assumes I mean accou
 - Syntax colouring
 - Bracket/Quote matching
 - Code folding  
-![Code Folding](images/FoldCode.gif)
+![Code Folding](images/FoldCode.gif)  
 ![Section Folding](images/FoldSection.gif)
 
 - Simple preview generation  
@@ -68,9 +68,13 @@ e.g.
     
     See [WebView API documentation](https://code.visualstudio.com/api/extension-guides/webview#loading-local-content) for more on this subject.
 
-
+## FAQ
+Some answers to potential problems can be found [here](FAQ.md).
 
 ## Release Notes
+
+### 0.0.3
+- Fixed Comments that surround template expansion (and other comment) patterns.
 
 ### 0.0.2
 - Minor documentation & naming issues fixed.

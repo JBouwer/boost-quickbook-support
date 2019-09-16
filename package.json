@@ -5,7 +5,7 @@
     "description": "Syntax highlighting & simple preview for Boost Quickbook",
     "license": "BSL-1.0",
     "icon": "images/boost-quickbook-support.png",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "engines": {
         "vscode": "^1.37.0"
     },
@@ -13,8 +13,8 @@
         "Programming Languages"
     ],
     "repository": {
-       "type": "git",
-       "url": "https://github.com/JBouwer/boost-quickbook-support.git"
+        "type": "git",
+        "url": "https://github.com/JBouwer/boost-quickbook-support.git"
     },
     "activationEvents": [
         "onCommand:quickbook.showPreview"

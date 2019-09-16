@@ -1,20 +1,16 @@
 [article VSCodeExtension_Quickbook.test
-    [id ArugiUtils.Xperimental & Archive.VSCodeExtension_Quickbook.test]
+    [id Xperimental & Archive.VSCodeExtension_Quickbook.test]
     [quickbook 1.7]
 ]
 
 [/
-    ArugiUtils/Xperimental & Archive/VSCodeExtension_Quickbook.test.qbk
-    ArugiUtils
+    Xperimental & Archive/VSCodeExtension_Quickbook.test.qbk
 
-    Created by Jan Bouwer on 23 August 2019.
-    Copyright (c) 2019 Jan Bouwer. All rights reserved.
-    
-    A Quickbook documentation file.
+    A test Quickbook documentation file.
     See 'http://www.boost.org/doc/html/quickbook.html' for more.
 ]
 
-[import ../../ArugiUtils/Documentation/Macros.qbk]
+[import Macros.qbk]
 
 def "string" abc 'sdfds' asda
 
@@ -35,26 +31,44 @@ def/
 
 `abc
 def`
-
+[Not comment]
+[/
 [section Synopsis]
 [Synopsis_VSCodeExtension_Quickbook.test]
 [endsect]
-
+]
+not commented
+[/
+[section Synopsis]
+[/Synopsis_VSCodeExtension_Quickbook.test]
+[endsect]
+]
+[not comment [/Comment]]
+[/
+[Synopsis_VSCodeExtension_Quickbook.test]
+]
+Not Commented
+[Test1
+]
+[/Test2
+]
+[/
+]
+[/]
+[/Test 3]
+[/
+Test 4]
 [section Examples]
 The range is equivalent to the open range
 ``[ (byte*)&value, (byte*)&value + sizeof(value) )``
 where byte is a `char`, optionally `signed` or `unsigned`, and value is an instance
 of any other type that can have its address taken.
 
-Use the `byteRange<Sign>(type)` factory function to create instances on the fly.
-
-`Sign` can be `void`(default), `signed` or `unsigned`,
-which maps to `char`, `signed char` or `unsigned char` accordingly.
-
 An overloaded `operator<<` function provides a hexadecimal dump of the value.
 [endsect]
 
 [section Usage]
+[section Sub section]
 [table
 [[Heading 1][Heading 2] [Heading 3]]
 [ [Row1 Col1][Row1 Col2] [Row1 Col3]]
@@ -63,21 +77,22 @@ An overloaded `operator<<` function provides a hexadecimal dump of the value.
 ]
 
 [endsect]
+[endsect]
 
 [section Files]
 The implementation comprises of the following files:
 
-* [sourceFile ArugiUtils/Xperimental & Archive/VSCodeExtension_Quickbook.test.fwd.hpp] [emdash] Include header with [ref_fwddecl_ref]s.
-* [sourceFile ArugiUtils/Xperimental & Archive/VSCodeExtension_Quickbook.test.hpp] [emdash] Include header with [ref_decl_ref]s.
-* [sourceFile ArugiUtils/Xperimental & Archive/VSCodeExtension_Quickbook.test.hxx] [emdash] Include header with ['inline] & ['template [ref_def_ref]s].
-* [sourceFile ArugiUtils/Xperimental & Archive/VSCodeExtension_Quickbook.test.cpp] [emdash] [link ref.rootsourcefile Root source file] for linking.
+* [sourceFile Xperimental & Archive/VSCodeExtension_Quickbook.test.fwd.hpp] [emdash] Include header with [ref_fwddecl_ref]s.
+* [sourceFile Xperimental & Archive/VSCodeExtension_Quickbook.test.hpp] [emdash] Include header with [ref_decl_ref]s.
+* [sourceFile Xperimental & Archive/VSCodeExtension_Quickbook.test.hxx] [emdash] Include header with ['inline] & ['template [ref_def_ref]s].
+* [sourceFile Xperimental & Archive/VSCodeExtension_Quickbook.test.cpp] [emdash] [link ref.rootsourcefile Root source file] for linking.
 
 [heading Documentation files]
-* [sourceFile ArugiUtils/Xperimental & Archive/VSCodeExtension_Quickbook.test.documentation.cpp] [emdash] [link ref.rootsourcefile Root source file] for testing & documentation examples.
-* [sourceFile ArugiUtils/Xperimental & Archive/VSCodeExtension_Quickbook.test.qbk] [emdash] [link_quickbook] documentation file.
+* [sourceFile Xperimental & Archive/VSCodeExtension_Quickbook.test.documentation.cpp] [emdash] [link ref.rootsourcefile Root source file] for testing & documentation examples.
+* [sourceFile Xperimental & Archive/VSCodeExtension_Quickbook.test.qbk] [emdash] [link_quickbook] documentation file.
 
 [heading Unit test files]
-* [sourceFile ArugiUtils/Tests/Xperimental & Archive/VSCodeExtension_Quickbook.test.test.hpp] [emdash] Include header with /unit test/ [ref_decl_ref]s.
-* [sourceFile ArugiUtils/Tests/Xperimental & Archive/VSCodeExtension_Quickbook.test.test.cpp] [emdash] [link ref.rootsourcefile Root source file] for /unit test/ linking.
+* [sourceFile Tests/Xperimental & Archive/VSCodeExtension_Quickbook.test.test.hpp] [emdash] Include header with /unit test/ [ref_decl_ref]s.
+* [sourceFile Tests/Xperimental & Archive/VSCodeExtension_Quickbook.test.test.cpp] [emdash] [link ref.rootsourcefile Root source file] for /unit test/ linking.
 
 [endsect]

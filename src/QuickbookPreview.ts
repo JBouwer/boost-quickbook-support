@@ -73,7 +73,7 @@ export class QuickbookPreview
                             self.localResourceRoots_.push( vscode.Uri.file(setting) );
                         }
                         
-                        return ' ' + option + '  "' + setting + '"';
+                        return ' ' + option + ' "' + setting + '"';
                     }
                     default: return '';
                 }

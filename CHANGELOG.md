@@ -8,6 +8,9 @@
 [//]: # (
     ## [Unreleased]
 )
+## 0.0.3
+- Fixed Comments that surround template expansion (and other comment) patterns.
+
 ## 0.0.2
 - Minor documentation & naming issues fixed.
 

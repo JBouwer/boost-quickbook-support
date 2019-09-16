@@ -12,10 +12,19 @@
             "name": "constant.character.escape.escapeTemplate.quickbook",
             "match": "\\\\."
         },
+        "matchedBracketPair": {
+            "begin": "(?<!\\\\)\\[",
+            "end": "(?<!\\\\)\\]"
+        },
         "commentTemplate": {
             "name": "comment.quickbook",
-            "begin": "\\[\\/",
-            "end": "\\]"
+            "begin": "(?<!\\\\)\\[\/",
+            "end": "(?<!\\\\)\\]",
+            "patterns": [
+                {
+                    "include": "#matchedBracketPair"
+                }
+            ]
         },
         "imageTemplate": {
             "name": "keyword.imageTemplate.quickbook",

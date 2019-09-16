@@ -6,3 +6,5 @@
 .gitignore
 images/*.svg
 vsc-extension-quickstart.md
+boost-quickbook-support.code-workspace
+VSCodeExtension_Quickbook.test.qbk
