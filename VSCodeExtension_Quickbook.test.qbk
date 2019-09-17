@@ -8,29 +8,103 @@
 
     A test Quickbook documentation file.
     See 'http://www.boost.org/doc/html/quickbook.html' for more.
+    [A template-like statement within a comment]
+    
+    [A multi -
+     line - 
+     template-like statement within a comment]
+     
+     \[An escaped \[
+    [reference]
+    \] An escaped \]
 ]
 
-[import Macros.qbk]
+[/import Macros.qbk]
 
-def "string" abc 'sdfds' asda
+General text, "double quoted text", 'single quoted text',
+and `inline code`.
 
-Returns a range of bytes (optionally signed or unsigned) from a single type instance.
+[teletype]
+Example in C++: [!c++] `int main() {}`,
+example with no highlighting: `int main() {}`.
 
-[warning `ByteRange` is not portable across platforms, just as `void*` is not portable across platforms. `ByteRange` merely provides a convenient ['C++'ism] for the popular C idiom.]
+``Code
+Block 1``
 
-`code` abc `def`
-// abc
-*iuty* abc _def_ hdfgsd =hgsadf= /abc/ /def
-def/
+``
+Code Block 2
+``
 
-[*abc]
-['def]
-[_ghi]
-[^jkl]
-[-mnop]
+```
+Code Block 3
+```
 
-`abc
-def`
+'''Escaped BoostBook'''
+
+[template other[p1]expanded [p1]]
+
+[section Phrase formatting]
+[section Template-type phrase formatting]
+
+['italic], [*bold], [_underline],
+[^teletype], [-strikethrough],[~replaceable]
+[*['bold-italic]]
+
+['italic [other template]], [*bold [other template]],
+[_underline [other template]], [^teletype [other template]],
+[-strikethrough [other template]], [~replaceable [other template]]
+[*['bold-italic [other template]]]
+
+['italic[other template2]], [*bold[other template2]],
+[_underline[other template2]], [^teletype[other template2]],
+[-strikethrough[other template2]], [~replaceable[other template2]]
+[*['bold-italic[other template2]]]
+
+["A question that sometimes drives me hazy: am I or are the others crazy?]--Einstein
+
+["Here's the rule for bargains: ["Do other men, for they would do you.] That's
+the true business precept.]
+
+[endsect]
+
+[section Simple Phrase Formatting]
+/italic/, *bold*, _underline_, =teletype=
+
+text *Bold*
+text *Is bold*
+text * Not bold*
+text*Not bold*
+
+Bullet list
+
+*Bold*
+*Is bold*
+* Not bold* *Not bold * * Not bold *
+
+[endsect]
+
+[section Anchor & links]
+[#named_anchor]
+[@http://www.boost.org this is [*boost's] website....]
+see [@http://spirit.sourceforge.net/]
+[endsect]
+
+[section Escapes]
+\u03B1 + \u03B2
+'''
+escape (no processing/formatting)
+'''
+
+'''
+<emphasis role="bold">This is direct XML markup</emphasis>
+'''
+
+[important
+Be careful when using the escape. The text must conform to [@https://www.boost.org/doc/html/boostbook.html BoostBook]/[@http://www.docbook.org DocBook] syntax.]
+[endsect]
+[endsect]
+
+[section Comment Playground]
 [Not comment]
 [/
 [section Synopsis]
@@ -58,6 +132,9 @@ Not Commented
 [/Test 3]
 [/
 Test 4]
+
+[endsect]
+
 [section Examples]
 The range is equivalent to the open range
 ``[ (byte*)&value, (byte*)&value + sizeof(value) )``
@@ -79,20 +156,17 @@ An overloaded `operator<<` function provides a hexadecimal dump of the value.
 [endsect]
 [endsect]
 
-[section Files]
-The implementation comprises of the following files:
+[section Bracket Test]
+Level 0-Cursor 0 [ Level 1 - Cursor 1 [ level 2 - cursor 2 [Level3 - Cursor3] Level 2 Cursor 2 [ Level 3 - Cursor 4 ] Level 2 - Cursor 2] Level 1 - Cursor 1] Level 0 - Cursor 0 \] Still Level 0 - Cursor 0
 
-* [sourceFile Xperimental & Archive/VSCodeExtension_Quickbook.test.fwd.hpp] [emdash] Include header with [ref_fwddecl_ref]s.
-* [sourceFile Xperimental & Archive/VSCodeExtension_Quickbook.test.hpp] [emdash] Include header with [ref_decl_ref]s.
-* [sourceFile Xperimental & Archive/VSCodeExtension_Quickbook.test.hxx] [emdash] Include header with ['inline] & ['template [ref_def_ref]s].
-* [sourceFile Xperimental & Archive/VSCodeExtension_Quickbook.test.cpp] [emdash] [link ref.rootsourcefile Root source file] for linking.
-
-[heading Documentation files]
-* [sourceFile Xperimental & Archive/VSCodeExtension_Quickbook.test.documentation.cpp] [emdash] [link ref.rootsourcefile Root source file] for testing & documentation examples.
-* [sourceFile Xperimental & Archive/VSCodeExtension_Quickbook.test.qbk] [emdash] [link_quickbook] documentation file.
-
-[heading Unit test files]
-* [sourceFile Tests/Xperimental & Archive/VSCodeExtension_Quickbook.test.test.hpp] [emdash] Include header with /unit test/ [ref_decl_ref]s.
-* [sourceFile Tests/Xperimental & Archive/VSCodeExtension_Quickbook.test.test.cpp] [emdash] [link ref.rootsourcefile Root source file] for /unit test/ linking.
+Level 0-Cursor 0 [ 
+    Level 1 - Cursor 1 
+    [ level 2 - cursor 2 [Level3 - Cursor3
+        ] Level 2 Cursor 2 
+        [ Level 3 - Cursor 4 ] 
+    Level 2 - Cursor 2] 
+    Level 1 - Cursor 1
+] Level 0 - Cursor 0 
+\] Still Level 0 - Cursor 0
 
 [endsect]
