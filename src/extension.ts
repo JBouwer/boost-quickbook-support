@@ -28,6 +28,16 @@ export function activate(context: vscode.ExtensionContext)
             }
         })
     );
+    
+    context.subscriptions.push(
+        vscode.commands.registerCommand('quickbook.refreshPreview', () => 
+        {
+            if(qbPreview)
+            {
+                qbPreview.refreshPreview();
+            }
+        })
+    );
 }
 
 export function deactivate(context: vscode.ExtensionContext)

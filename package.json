@@ -91,6 +91,11 @@
                 "command": "quickbook.showPreview",
                 "title": "Open Preview",
                 "category": "Boost Quickbook"
+            },
+            {
+                "command": "quickbook.refreshPreview",
+                "title": "Refresh Preview",
+                "category": "Boost Quickbook"
             }
         ],
         "languages": [
@@ -118,6 +123,13 @@
                 {
                     "when": "resourceLangId == quickbook",
                     "command": "quickbook.showPreview",
+                    "group": "navigation"
+                }
+            ],
+            "editor/title": [
+                {
+                    "when": "quickbookPreviewActive",
+                    "command": "quickbook.refreshPreview",
                     "group": "navigation"
                 }
             ]

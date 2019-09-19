@@ -10,6 +10,7 @@
 )
 ## 0.0.3
 - Fixed Comments that surround template expansion (and other comment) patterns.
+- Added "Refresh" command to preview window.
 
 ## 0.0.2
 - Minor documentation & naming issues fixed.

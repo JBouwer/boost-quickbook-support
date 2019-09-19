@@ -6,11 +6,14 @@ import * as cp from 'child_process';
 
 export class QuickbookPreview
 {
+    private static readonly keyContextActive = 'quickbookPreviewActive';
+    
     private context_: vscode.ExtensionContext;
     private panel_: vscode.WebviewPanel | undefined;
     private column_: vscode.ViewColumn = vscode.ViewColumn.One;
     private channelOutput_: vscode.OutputChannel | undefined;
     private localResourceRoots_: vscode.Uri[] = [];
+    private txtEditorSource_: vscode.TextEditor | undefined;
     
     // Path to processed preview html on disk.
     readonly strPathPreview_: string;
@@ -154,8 +157,8 @@ export class QuickbookPreview
         {
             // Create and show a new webview
             self.panel_ = vscode.window.createWebviewPanel(
-                    'quickbook',                            // Identifies the type of the webview. Used internally
-                    'Preview',                              // Title of the panel displayed to the user
+                    'quickbook.preview',    // Identifies the type of the webview. Used internally
+                    'Preview',              // Title of the panel displayed to the user
                     self.column_ ? self.column_
                                  : vscode.ViewColumn.One,   // Editor column to show the new webview panel in.
                     {
@@ -168,21 +171,28 @@ export class QuickbookPreview
             // Reset when the current panel is closed
             self.panel_.onDidDispose(
                     () => {
+                        self.registerActive(false);
                         self.panel_ = undefined;
                     },
                     null,
                     self.context_.subscriptions
                 );
+            self.panel_.onDidChangeViewState(
+                ({ webviewPanel }) => {
+                    self.registerActive(webviewPanel.active);
+                });
         }
         
         self.panel_.title = title;
         self.panel_.webview.html = contents;
         self.panel_.reveal(this.column_);
+        self.registerActive(true);
     }
     
     public async updatePreview(txtEditor: vscode.TextEditor)
     {
         const self = this;
+        self.txtEditorSource_ = txtEditor;
         
         const exists = (pathFile: string): Promise<string> => {
             return new Promise<string>((resolve, reject) => {
@@ -240,5 +250,18 @@ export class QuickbookPreview
             self.setOutputChannel(...messages);
             self.setPreview( title, self.getFailurePage(...messages) );
         });
+    }
+    
+    public async refreshPreview()
+    {
+        if(this.txtEditorSource_)
+        {
+            this.updatePreview(this.txtEditorSource_);
+        }
+    }
+    
+    private registerActive(flag: boolean)
+    {
+        vscode.commands.executeCommand('setContext', QuickbookPreview.keyContextActive, flag);
     }
 }
