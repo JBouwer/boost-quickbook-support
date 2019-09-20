@@ -98,6 +98,20 @@ export class QuickbookPreview
                          ;
     }
     
+    private registerActive(flag: boolean)
+    {
+        vscode.commands.executeCommand('setContext', QuickbookPreview.keyContextActive, flag);
+    }
+    
+    private get iconPath()
+    {
+        const root = path.join(this.context_.extensionPath, 'images');
+        return {
+            light: vscode.Uri.file(path.join(root, 'preview-light.svg')),
+            dark: vscode.Uri.file(path.join(root, 'preview-dark.svg'))
+            };
+    }
+    
     protected getFailurePage(...strings: string[])
     {
         let args = strings.reverse();
@@ -274,17 +288,11 @@ export class QuickbookPreview
         }
     }
     
-    private registerActive(flag: boolean)
+    public async viewSource()
     {
-        vscode.commands.executeCommand('setContext', QuickbookPreview.keyContextActive, flag);
-    }
-    
-    private get iconPath()
-    {
-        const root = path.join(this.context_.extensionPath, 'images');
-        return {
-            light: vscode.Uri.file(path.join(root, 'preview-light.svg')),
-            dark: vscode.Uri.file(path.join(root, 'preview-dark.svg'))
-            };
+        if(this.txtEditorSource_)
+        {
+            vscode.window.showTextDocument(this.txtEditorSource_.document, this.txtEditorSource_.viewColumn);
+        }
     }
 }

@@ -57,6 +57,16 @@ export function activate(context: vscode.ExtensionContext)
             }
         })
     );
+    
+    context.subscriptions.push(
+        vscode.commands.registerCommand('quickbook.viewSource', () => 
+        {
+            if(qbPreview)
+            {
+                qbPreview.viewSource();
+            }
+        })
+    );
 }
 
 export function deactivate(context: vscode.ExtensionContext)

@@ -133,6 +133,15 @@
                     "light": "./images/refresh-light.svg",
                     "dark": "./images/refresh-dark.svg"
                 }
+            },
+            {
+                "command": "quickbook.viewSource",
+                "title": "View Source",
+                "category": "Boost Quickbook",
+                "icon": {
+                    "light": "./images/view-source-light.svg",
+                    "dark": "./images/view-source-dark.svg"
+                }
             }
         ],
         "menus": {
@@ -151,6 +160,11 @@
                     "when": "quickbookPreviewActive",
                     "command": "quickbook.refreshPreview",
                     "group": "navigation"
+                },
+                {
+                    "when": "quickbookPreviewActive",
+                    "command": "quickbook.viewSource",
+                    "group": "navigation"
                 }
             ],
             "editor/title": [
@@ -167,6 +181,11 @@
                 {
                     "when": "quickbookPreviewActive",
                     "command": "quickbook.refreshPreview",
+                    "group": "navigation"
+                },
+                {
+                    "when": "quickbookPreviewActive",
+                    "command": "quickbook.viewSource",
                     "group": "navigation"
                 }
             ]
