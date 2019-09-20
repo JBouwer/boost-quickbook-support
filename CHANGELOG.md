@@ -10,7 +10,11 @@
 )
 ## 0.0.3
 - Fixed Comments that surround template expansion (and other comment) patterns.
-- Added "Refresh" command to preview window.
+- Preview panel now with buttons & menu items:
+    - Refresh
+    - View Source
+    - Preview to the side
+- Command palette now ignoring invalid entries
 
 ## 0.0.2
 - Minor documentation & naming issues fixed.

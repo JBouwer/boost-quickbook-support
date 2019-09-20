@@ -17,6 +17,7 @@
         "url": "https://github.com/JBouwer/boost-quickbook-support.git"
     },
     "activationEvents": [
+        "onLanguage:quickbook",
         "onCommand:quickbook.showPreview"
     ],
     "main": "./out/extension",
@@ -145,6 +146,28 @@
             }
         ],
         "menus": {
+            "commandPalette": [
+                {
+                    "when": "resourceLangId == quickbook",
+                    "command": "quickbook.showPreview",
+                    "group": "navigation"
+                },
+                {
+                    "when": "resourceLangId == quickbook",
+                    "command": "quickbook.showPreviewToSide",
+                    "group": "navigation"
+                },
+                {
+                    "when": "quickbookPreviewActive",
+                    "command": "quickbook.refreshPreview",
+                    "group": "navigation"
+                },
+                {
+                    "when": "quickbookPreviewActive",
+                    "command": "quickbook.viewSource",
+                    "group": "navigation"
+                }
+            ],
             "editor/title/context": [
                 {
                     "when": "resourceLangId == quickbook",
