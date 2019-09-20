@@ -86,18 +86,6 @@
                 }
             }
         },
-        "commands": [
-            {
-                "command": "quickbook.showPreview",
-                "title": "Open Preview",
-                "category": "Boost Quickbook"
-            },
-            {
-                "command": "quickbook.refreshPreview",
-                "title": "Refresh Preview",
-                "category": "Boost Quickbook"
-            }
-        ],
         "languages": [
             {
                 "id": "quickbook",
@@ -118,15 +106,64 @@
                 "path": "./syntaxes/quickbook.tmLanguage.json"
             }
         ],
+        "commands": [
+            {
+                "command": "quickbook.showPreview",
+                "title": "Open Preview",
+                "category": "Boost Quickbook",
+                "icon": {
+                    "light": "./images/preview-light.svg",
+                    "dark": "./images/preview-dark.svg"
+                }
+            },
+            {
+                "command": "quickbook.showPreviewToSide",
+                "title": "Open Preview to the Side",
+                "category": "Boost Quickbook",
+                "icon": {
+                    "light": "./images/preview-right-light.svg",
+                    "dark": "./images/preview-right-dark.svg"
+                }
+            },
+            {
+                "command": "quickbook.refreshPreview",
+                "title": "Refresh Preview",
+                "category": "Boost Quickbook",
+                "icon": {
+                    "light": "./images/refresh-light.svg",
+                    "dark": "./images/refresh-dark.svg"
+                }
+            }
+        ],
         "menus": {
             "editor/title/context": [
                 {
                     "when": "resourceLangId == quickbook",
                     "command": "quickbook.showPreview",
                     "group": "navigation"
+                },
+                {
+                    "when": "resourceLangId == quickbook",
+                    "command": "quickbook.showPreviewToSide",
+                    "group": "navigation"
+                },
+                {
+                    "when": "quickbookPreviewActive",
+                    "command": "quickbook.refreshPreview",
+                    "group": "navigation"
                 }
             ],
             "editor/title": [
+                {
+                    "when": "resourceLangId == quickbook",
+                    "command": "quickbook.showPreview",
+                    "group": "navigation"
+                },
+                {
+                    "when": "resourceLangId == quickbook",
+                    "command": "quickbook.showPreviewToSide",
+                    "group": "navigation"
+                },
                 {
                     "when": "quickbookPreviewActive",
                     "command": "quickbook.refreshPreview",

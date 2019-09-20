@@ -20,7 +20,26 @@ export function activate(context: vscode.ExtensionContext)
             
             if(vscode.window.activeTextEditor)
             {
-                qbPreview.updatePreview(vscode.window.activeTextEditor);
+                qbPreview.showPreview(vscode.window.activeTextEditor);
+            } 
+            else
+            {
+                console.log('No "vscode.window.activeTextEditor" for requested preview!');
+            }
+        })
+    );
+    
+    context.subscriptions.push(
+        vscode.commands.registerCommand('quickbook.showPreviewToSide', () => 
+        {
+            if(!qbPreview)
+            {
+                qbPreview = new QuickbookPreview(context);
+            }
+            
+            if(vscode.window.activeTextEditor)
+            {
+                qbPreview.showPreviewToSide(vscode.window.activeTextEditor);
             } 
             else
             {

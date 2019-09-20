@@ -184,12 +184,13 @@ export class QuickbookPreview
         }
         
         self.panel_.title = title;
+        self.panel_.iconPath = self.iconPath;
         self.panel_.webview.html = contents;
-        self.panel_.reveal(this.column_);
+        self.panel_.reveal(self.column_);
         self.registerActive(true);
     }
     
-    public async updatePreview(txtEditor: vscode.TextEditor)
+    private async updatePreview(txtEditor: vscode.TextEditor)
     {
         const self = this;
         self.txtEditorSource_ = txtEditor;
@@ -229,11 +230,6 @@ export class QuickbookPreview
             });
         };
         
-        if(txtEditor.viewColumn)
-        {
-            self.column_ = txtEditor.viewColumn;
-        }
-        
         const pathSourceFile = txtEditor.document.fileName;
         const title = "Preview " + path.basename( pathSourceFile );
         
@@ -252,6 +248,24 @@ export class QuickbookPreview
         });
     }
     
+    public async showPreview(txtEditor: vscode.TextEditor)
+    {
+        if(txtEditor.viewColumn)
+        {
+            this.column_ = txtEditor.viewColumn;
+        }
+        
+        this.updatePreview(txtEditor);
+    }
+    
+    public async showPreviewToSide(txtEditor: vscode.TextEditor)
+    {
+        this.column_ = txtEditor.viewColumn ? txtEditor.viewColumn + 1
+                                            : vscode.ViewColumn.Beside;
+        
+        this.updatePreview(txtEditor);
+    }
+    
     public async refreshPreview()
     {
         if(this.txtEditorSource_)
@@ -263,5 +277,14 @@ export class QuickbookPreview
     private registerActive(flag: boolean)
     {
         vscode.commands.executeCommand('setContext', QuickbookPreview.keyContextActive, flag);
+    }
+    
+    private get iconPath()
+    {
+        const root = path.join(this.context_.extensionPath, 'images');
+        return {
+            light: vscode.Uri.file(path.join(root, 'preview-light.svg')),
+            dark: vscode.Uri.file(path.join(root, 'preview-dark.svg'))
+            };
     }
 }

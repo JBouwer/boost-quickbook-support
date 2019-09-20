@@ -1,8 +1,19 @@
 Images sourced from:
+    
     https://openclipart.org/detail/17922/books-by-aj
         by "AJ"
+        Licensed as:
+            http://creativecommons.org/licenses/publicdomain/
+    
     https://openclipart.org/detail/182044/plumier-by-presquesage-182044
         by "presquesage"
+        Licensed as:
+            http://creativecommons.org/licenses/publicdomain/
     
-Licensed as:
-    http://creativecommons.org/licenses/publicdomain/
+    https://github.com/microsoft/vscode
+        (extensions/markdown-language-features/media/)
+        (src/vs/workbench/contrib/search/browser/media/)
+        Licensed as:
+            https://github.com/microsoft/vscode/blob/master/LICENSE.txt (MIT License)
+    
+
