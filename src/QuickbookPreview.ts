@@ -163,7 +163,15 @@ export class QuickbookPreview
         channel.show(true);
     }
     
-    public setPreview(title: string, contents: string)
+    protected processPreview( contents: string, strContentSP: string)
+    {
+        // Inject Security Policy
+        let strSecurityPolicy = `<meta http-equiv="Content-Security-Policy" content="${strContentSP}">`;
+        const regexHead = /\<head\>(.*)\<\/head\>/;
+        return contents.replace(regexHead, '<head>' + strSecurityPolicy + '$1</head>');
+    }
+    
+    protected setPreview(title: string, contents: string)
     {
         const self = this;
         
@@ -255,7 +263,8 @@ export class QuickbookPreview
             self.setOutputChannel(...output);
             return readFile( self.strPathPreview_, {} );
         }).then((strContents) => {
-            self.setPreview( title, strContents );
+            let strProcessedContents = self.processPreview( strContents, "default-src vscode-resource:;" );
+            self.setPreview( title, strProcessedContents );
         }).catch((messages: string[]) => {
             self.setOutputChannel(...messages);
             self.setPreview( title, self.getFailurePage(...messages) );
