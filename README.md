@@ -40,6 +40,17 @@ These settings are processed as follows:
 1. Otherwise the specified path is prepended in turn by each of the workspace directories - if it exists, it is used.
 1. Otherwise the specified path is used as specified.
 
+Also note that:
+* If they exist, the following local filesystem directories (and subdirectories) are trusted, 
+  and added to the `localResourceRoots` of the preview `Webview`:
+    * The _workspace directory_.
+    * The `out` subdirectory of the installed extension directory.
+    * All settings-specified paths.
+* To use local filesystem resources (e.g. `CSS` file, or _Boost_ directory), 
+  prepend each with a `vscode-resource:` scheme;  
+  e.g. `vscode-resource:/path/to/my/css_file.css`.  
+  See the  [WebView API documentation](https://code.visualstudio.com/api/extension-guides/webview#loading-local-content) for more on this subject.
+
 ## Known Issues
 
 This extension is not bullet proof. It is only intended as the next step up from a pure text editor - not as a *complete documentation writing tool*.
@@ -57,16 +68,7 @@ e.g.
     is simply specified inside the `language-configuration.json` file.
     I don't know how to do specify the concept of an *escaped* character in there - if possible at all.  
 
-- The *preview* panel does not correctly display graphics/images etc.
-    #### Explanation
-    The *preview* is simply generated with the `quickbook --output-format onehtml ...` option.  
-    As [Visual Studio Code](http://code.visualstudio.com) is rightly security conscious, the
-    [WebView](https://code.visualstudio.com/api/extension-guides/webview) 
-    that I use to display the preview does not have access to local resources outside of the `vscode-resource:` schema.  
-    Personally I'm fine with that - a quick preview of the document-structure and presentation is all I wanted.  
-    It may be possible to post-process the generated HTML in order to change the schema, but in my opinion it kind of defies the purpose of the extension.
-    
-    See [WebView API documentation](https://code.visualstudio.com/api/extension-guides/webview#loading-local-content) for more on this subject.
+- The *preview* panel does not correctly display user-images.
 
 ## FAQ
 Some answers to potential problems can be found [here](FAQ.md).
@@ -75,6 +77,10 @@ Some answers to potential problems can be found [here](FAQ.md).
 
 ### 0.0.4
 - Added _Content Security Policy_, (Issue #3), and associated `quickbook.preview.contentSecurityPolicy` setting.
+- Partially fixed Issue #2, with support for `CSS` file setting & support graphics (not user-images).
+    > Note that at the time of writing I needed to set the _Graphics Path_ setting to:
+    > `vscode-resource:/BOOST_PATH/doc/src/images/` for this to work correctly - setting the _Boost Root Directory_
+    > only did not resolve to the correct image directory.
 
 ### 0.0.3
 - Fixed Comments that surround template expansion (and other comment) patterns.

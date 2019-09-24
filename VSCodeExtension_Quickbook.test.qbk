@@ -3,6 +3,10 @@
     [quickbook 1.7]
 ]
 
+These examples liberally adapted from the 
+[@http://www.boost.org/doc/html/quickbook.html
+Quickbook Documentation].
+
 [/
     Xperimental & Archive/VSCodeExtension_Quickbook.test.qbk
 
@@ -135,27 +139,6 @@ Test 4]
 
 [endsect]
 
-[section Examples]
-The range is equivalent to the open range
-``[ (byte*)&value, (byte*)&value + sizeof(value) )``
-where byte is a `char`, optionally `signed` or `unsigned`, and value is an instance
-of any other type that can have its address taken.
-
-An overloaded `operator<<` function provides a hexadecimal dump of the value.
-[endsect]
-
-[section Usage]
-[section Sub section]
-[table
-[[Heading 1][Heading 2] [Heading 3]]
-[ [Row1 Col1][Row1 Col2] [Row1 Col3]]
-[[Row2 Col1] [Row2 \[Col2][Row2 Col3] ]
-[[Row3 Col1] [Row3 Col2 -\]][Row3 Col3]]
-]
-
-[endsect]
-[endsect]
-
 [section Bracket Test]
 Level 0-Cursor 0 [ Level 1 - Cursor 1 [ level 2 - cursor 2 [Level3 - Cursor3] Level 2 Cursor 2 [ Level 3 - Cursor 4 ] Level 2 - Cursor 2] Level 1 - Cursor 1] Level 0 - Cursor 0 \] Still Level 0 - Cursor 0
 
@@ -173,12 +156,232 @@ Level 0-Cursor 0 [
 
 [section Other]
 
+[section Images]
 Image below
 
-[$images/boost-quickbook-support.png]
+[$images/boost-quickbook-support.svg]
 
 Image above
+[endsect]
 
+[section Footnote]
+Footnote: [footnote A sample footnote]
+[endsect]
+
+[section Macros]
+Macro defintion:
+[def __a_macro_identifier__ Macro contents]
+__a_macro_identifier__
+
+Conditional Generation:
+[? __a_macro_identifier__ to be or not to be]
+[? __to_be__ but not to be]
+[?! __to_be__ and to be again]
+[endsect]
+[endsect]
+
+[section Block Level Elements]
+
+Ordered lists
+
+# One
+# Two
+# Three
+
+List Hierarchies
+
+# One
+# Two
+# Three
+    # Three.a
+    # Three.b
+    # Three.c
+# Four
+    # Four.a
+        # Four.a.i
+        # Four.a.ii
+# Five
+
+Unordered lists
+
+* First
+* Second
+* Third
+
+Mixed lists
+Mixed lists (ordered and unordered) are supported. Example:
+
+# One
+# Two
+# Three
+    * Three.a
+    * Three.b
+    * Three.c
+# Four
+
+Paragraphs in lists
+
+* List item 1, paragraph 1
+
+  List item 1, paragraph 2
+
+* List item 2, paragraph 1
+
+  List item 2, paragraph 2
+
+Explicit list tags
+
+[ordered_list [item1][item2]]
+
+[itemized_list [item1][item2]]
+
+Code 
+
+[!c++]
+    #include <iostream>
+    
+    int main()
+    {
+        // Sample code
+        std::cout << "Hello, World\n";
+        return 0;
+    }
+
+[!c++]
+    std::string foo_bar() /*< The /Mythical/ FooBar.
+                          See [@http://en.wikipedia.org/wiki/Foobar Foobar for details] >*/
+    {
+        return "foo-bar"; /*< return 'em, foo-bar man! >*/
+    }
+
+Preformatted
+
+[pre
+
+    Some *preformatted* text                    Some *preformatted* text
+
+        Some *preformatted* text            Some *preformatted* text
+
+            Some *preformatted* text    Some *preformatted* text
+
+]
+
+Blockquote
+
+[:sometext...]
+
+Admonitions
+[note This is a note]
+[tip This is a tip]
+[important This is important]
+[caution This is a caution]
 [warning This is a warning]
 
+Headings
+[h1 Heading 1]
+[h2 Heading 2]
+[h3 Heading 3]
+[h4 Heading 4]
+[h5 Heading 5]
+[h6 Heading 6]
+
+Predefined Macros
+
+Today's date: __DATE__
+
+The current time: __TIME__
+
+Filename: "__FILENAME__"
+
+Nullary Templates
+[template alpha[]'''&#945;''']
+[template beta[]'''&#946;''']
+Some squigles...[*[alpha][beta]]
+
+[template tag\ _tag]
+`struct` x[tag];
+
+Punctuation Templates
+
+[template ~[bar] <hey>[bar]</hey>]
+Now, expanding this:
+[~baz] - Not working as expected... (Used '~' instead of '!')
+
+Blurbs
+[blurb :-) [*An eye catching advertisement or note...]
+
+    Spirit is an object-oriented recursive-descent parser generator framework
+    implemented using template meta-programming techniques. Expression templates
+    allow us to approximate the syntax of Extended Backus-Normal Form (EBNF)
+    completely in C++.
+]
+
+[section:tables Tables]
+[table:id A Simple Table
+    [[Heading 1] [Heading 2] [Heading 3]]
+    [[R0-C0]     [R0-C1]     [R0-C2]]
+    [[R1-C0]     [R1-C1]     [R1-C2]]
+    [[R2-C0]     [R2-C1]     [R2-C2]]
+]
+
+[section Pedantics]
+[table
+[[Heading 1][Heading 2] [Heading 3]]
+[ [Row1 Col1][Row1 Col2] [Row1 Col3]]
+[[Row2 Col1] [Row2 \[Col2][Row2 Col3] ]
+[[Row3 Col1] [Row3 Col2 -\]][Row3 Col3]]
+]
+
+[table Table with fat cells
+    [[Heading 1] [Heading 2]]
+    [
+        [Row 0, Col 0: a small cell]
+        [
+            Row 0, Col 1: a big fat cell with paragraphs
+
+            Boost provides free peer-reviewed portable C++ source libraries.
+
+            We emphasize libraries that work well with the C++ Standard Library.
+            Boost libraries are intended to be widely useful, and usable across
+            a broad spectrum of applications. The Boost license encourages both
+            commercial and non-commercial use.
+        ]
+    ]
+    [
+        [Row 1, Col 0: a small cell]
+        [Row 1, Col 1: a small cell]
+    ]
+]
+
+[table Table with code
+    [[Comment] [Code]]
+    [
+        [My first program]
+        [``
+            #include <iostream>
+
+            int main()
+            {
+                std::cout << "Hello, World!" << std::endl;
+                return 0;
+            }
+        ``]
+    ]
+]
+
+[endsect]
+[endsect:tables]
+
+[section Variable Lists]
+
+[variablelist A Variable List
+    [[term 1] [The definition of term 1]]
+    [[term 2] [The definition of term 2]]
+    [[term 3] [
+    The definition of term 3.
+
+    Definitions may contain paragraphs.
+    ]]
+]
+[endsect]
 [endsect]

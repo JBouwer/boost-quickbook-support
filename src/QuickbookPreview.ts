@@ -72,12 +72,22 @@ export class QuickbookPreview
                                 }
                             }
                             
+                            // Attempt to parse the setting as an URI - if fail interpret it as a filesystem path.
+                            let uriSetting:vscode.Uri;
+                            try{
+                                uriSetting = vscode.Uri.parse(path.dirname(setting), true);
+                                // Apparently 'file:' scheme is fine.
+                                // uriSetting = uriSetting.with({ scheme: 'file' });
+                            } catch(err)
+                            {
+                                uriSetting = vscode.Uri.file(path.dirname(setting));
+                            }
+                            
                             // Add the directory to the 'localResourceRoots' array.
                             // Note that this by itself will not allow the VSCode Webview to access local resources...
-                            // ... they need to be accessed with the 'vscode-resource:' scheme...
-                            // ... which probably renders this useless for our Quickbook preview.
+                            // ... they need to be accessed with the 'vscode-resource:' scheme.
                             // See: https://code.visualstudio.com/api/extension-guides/webview#loading-local-content
-                            self.localResourceRoots_.push( vscode.Uri.file(setting) );
+                            self.localResourceRoots_.push(uriSetting);
                         }
                         
                         return ' ' + option + ' "' + setting + '"';
@@ -173,6 +183,10 @@ export class QuickbookPreview
         let strSecurityPolicy = `<meta http-equiv="Content-Security-Policy" content="${strContentSP}">`;
         const regexHead = /\<head\>(.*)\<\/head\>/;
         return contents.replace(regexHead, '<head>' + strSecurityPolicy + '$1</head>');
+        
+        // ?Possible?
+        // Scan the html and update every 'file:' URI to the 'vscode-resource:' scheme,
+        // using 1.38's webview.asWebviewUri
     }
     
     protected setPreview(title: string, contents: string)

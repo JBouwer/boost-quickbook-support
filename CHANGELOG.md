@@ -5,11 +5,12 @@
     Check http://keepachangelog.com for recommendations on how to structure this file.
 )
 
-[//]: # (
-    ## [Unreleased]
-)
 ## 0.0.4
 - Added _Content Security Policy_, (Issue #3), and associated `quickbook.preview.contentSecurityPolicy` setting.
+- Partially fixed Issue #2, with support for `CSS` file setting & support graphics (not user-images).
+    > Note that at the time of writing I needed to set the _Graphics Path_ setting to:
+    > `vscode-resource:/BOOST_PATH/doc/src/images/` for this to work correctly - setting the _Boost Root Directory_
+    > only did not resolve to the correct image directory.
 
 ## 0.0.3
 - Fixed Comments that surround template expansion (and other comment) patterns.
