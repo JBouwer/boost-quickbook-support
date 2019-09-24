@@ -3,39 +3,22 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as cp from 'child_process';
 
-
-export class QuickbookPreview
+class Settings
 {
-    private static readonly keyContextActive = 'quickbookPreviewActive';
+    readonly strPathToExecutable: string;
+    readonly strOptions: string;
+    readonly strContentSecurityPolicy: string;
+    readonly localResourceRoots: vscode.Uri[] = [];
     
-    private context_: vscode.ExtensionContext;
-    private panel_: vscode.WebviewPanel | undefined;
-    private column_: vscode.ViewColumn = vscode.ViewColumn.One;
-    private channelOutput_: vscode.OutputChannel | undefined;
-    private localResourceRoots_: vscode.Uri[] = [];
-    private txtEditorSource_: vscode.TextEditor | undefined;
-    
-    // Path to processed preview html on disk.
-    readonly strPathPreview_: string;
-    
-    // Read from SETTINGS:
-    readonly strPathToExecutable_: string;
-    readonly strOptions_: string;
-    readonly strContentSecurityPolicy_: string;
-    
-    constructor(context: vscode.ExtensionContext)
+    constructor()
     {
-        const self = this;
-        this.context_ = context;
-        this.strPathPreview_ = path.join( context.extensionPath, 'out', 'preview.html' );
-        
         let config = vscode.workspace.getConfiguration('quickbook');
         
         let strPathToExecutable: string | undefined = config.get('preview.pathToExecutable');
-        this.strPathToExecutable_ = (strPathToExecutable && fs.existsSync(strPathToExecutable)) ? strPathToExecutable : 'quickbook';
+        this.strPathToExecutable = (strPathToExecutable && fs.existsSync(strPathToExecutable)) ? strPathToExecutable : 'quickbook';
         
         let strCSP: string | undefined = config.get('preview.contentSecurityPolicy');
-        this.strContentSecurityPolicy_ = strCSP ? strCSP : "default-src 'none';";
+        this.strContentSecurityPolicy = strCSP ? strCSP : "default-src 'none';";
         
         let pathIncludeWorkspace: boolean | undefined = config.get('preview.include.workspacePath');
         let strPathIncludeWorkspace : string = 
@@ -43,6 +26,7 @@ export class QuickbookPreview
                 ? ' --include-path "' + vscode.workspace.workspaceFolders[0].uri.fsPath + '"'
                 : '';
         
+        const self = this;
         function strSetting(section: string, option: string, processStringAsPath: boolean = false): string
         {
             let v = config.get(section);
@@ -87,7 +71,7 @@ export class QuickbookPreview
                             // Note that this by itself will not allow the VSCode Webview to access local resources...
                             // ... they need to be accessed with the 'vscode-resource:' scheme.
                             // See: https://code.visualstudio.com/api/extension-guides/webview#loading-local-content
-                            self.localResourceRoots_.push(uriSetting);
+                            self.localResourceRoots.push(uriSetting);
                         }
                         
                         return ' ' + option + ' "' + setting + '"';
@@ -98,7 +82,7 @@ export class QuickbookPreview
             else return '';
         }
         
-        this.strOptions_ = strSetting('preview.strict', '--strict')
+        this.strOptions  = strSetting('preview.strict', '--strict')
                          + strSetting('preview.noSelfLinkedHeaders', '--no-self-linked-headers')
                          + strSetting('preview.indent', '--indent')
                          + strSetting('preview.lineWidth', '--linewidth')
@@ -110,6 +94,27 @@ export class QuickbookPreview
                          + strSetting('preview.CSSPath', '--css-path', true)
                          + strSetting('preview.graphicsPath', '--graphics-path', true)
                          ;
+    }
+    
+};
+
+export class QuickbookPreview
+{
+    private static readonly keyContextActive = 'quickbookPreviewActive';
+    
+    private context_: vscode.ExtensionContext;
+    private panel_: vscode.WebviewPanel | undefined;
+    private column_: vscode.ViewColumn = vscode.ViewColumn.One;
+    private channelOutput_: vscode.OutputChannel | undefined;
+    private txtEditorSource_: vscode.TextEditor | undefined;
+    
+    // Path to processed preview html on disk.
+    readonly strPathPreview_: string;
+    
+    constructor(context: vscode.ExtensionContext)
+    {
+        this.context_ = context;
+        this.strPathPreview_ = path.join( context.extensionPath, 'out', 'preview.html' );
     }
     
     private registerActive(flag: boolean)
@@ -189,7 +194,7 @@ export class QuickbookPreview
         // using 1.38's webview.asWebviewUri
     }
     
-    protected setPreview(title: string, contents: string)
+    protected setPreview(title: string, contents: string, urisResourceRoots: vscode.Uri[])
     {
         const self = this;
         
@@ -202,7 +207,7 @@ export class QuickbookPreview
                     self.column_ ? self.column_
                                  : vscode.ViewColumn.One,   // Editor column to show the new webview panel in.
                     {
-                        localResourceRoots: self.localResourceRoots_,
+                        localResourceRoots: urisResourceRoots,
                         enableFindWidget: true,
                         enableScripts: true
                     }
@@ -272,20 +277,21 @@ export class QuickbookPreview
         
         const pathSourceFile = txtEditor.document.fileName;
         const title = "Preview " + path.basename( pathSourceFile );
+        const settings = new Settings();
         
         exists(txtEditor.document.fileName).then( (pathFileSource: string) => {
-            let commandLine = `${this.strPathToExecutable_}${this.strOptions_} --output-format onehtml --output-file "${self.strPathPreview_}" "${pathFileSource}" `;
+            let commandLine = `${settings.strPathToExecutable}${settings.strOptions} --output-format onehtml --output-file "${self.strPathPreview_}" "${pathFileSource}" `;
             
             return exec(commandLine, {});
         }).then( (output) => {
             self.setOutputChannel(...output);
             return readFile( self.strPathPreview_, {} );
         }).then((strContents) => {
-            let strProcessedContents = self.processPreview( strContents, self.strContentSecurityPolicy_ );
-            self.setPreview( title, strProcessedContents );
+            let strProcessedContents = self.processPreview( strContents, settings.strContentSecurityPolicy );
+            self.setPreview( title, strProcessedContents , settings.localResourceRoots);
         }).catch((messages: string[]) => {
             self.setOutputChannel(...messages);
-            self.setPreview( title, self.getFailurePage(...messages) );
+            self.setPreview( title, self.getFailurePage(...messages), settings.localResourceRoots );
         });
     }
     
