@@ -170,3 +170,15 @@ Level 0-Cursor 0 [
 \] Still Level 0 - Cursor 0
 
 [endsect]
+
+[section Other]
+
+Image below
+
+[$images/boost-quickbook-support.png]
+
+Image above
+
+[warning This is a warning]
+
+[endsect]

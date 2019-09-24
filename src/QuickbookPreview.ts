@@ -21,6 +21,7 @@ export class QuickbookPreview
     // Read from SETTINGS:
     readonly strPathToExecutable_: string;
     readonly strOptions_: string;
+    readonly strContentSecurityPolicy_: string;
     
     constructor(context: vscode.ExtensionContext)
     {
@@ -32,6 +33,9 @@ export class QuickbookPreview
         
         let strPathToExecutable: string | undefined = config.get('preview.pathToExecutable');
         this.strPathToExecutable_ = (strPathToExecutable && fs.existsSync(strPathToExecutable)) ? strPathToExecutable : 'quickbook';
+        
+        let strCSP: string | undefined = config.get('preview.contentSecurityPolicy');
+        this.strContentSecurityPolicy_ = strCSP ? strCSP : "default-src 'none';";
         
         let pathIncludeWorkspace: boolean | undefined = config.get('preview.include.workspacePath');
         let strPathIncludeWorkspace : string = 
@@ -263,7 +267,7 @@ export class QuickbookPreview
             self.setOutputChannel(...output);
             return readFile( self.strPathPreview_, {} );
         }).then((strContents) => {
-            let strProcessedContents = self.processPreview( strContents, "default-src vscode-resource:;" );
+            let strProcessedContents = self.processPreview( strContents, self.strContentSecurityPolicy_ );
             self.setPreview( title, strProcessedContents );
         }).catch((messages: string[]) => {
             self.setOutputChannel(...messages);

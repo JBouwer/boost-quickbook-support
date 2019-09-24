@@ -8,6 +8,9 @@
 [//]: # (
     ## [Unreleased]
 )
+## 0.0.4
+- Added _Content Security Policy_, (Issue #3), and associated `quickbook.preview.contentSecurityPolicy` setting.
+
 ## 0.0.3
 - Fixed Comments that surround template expansion (and other comment) patterns.
 - Preview panel now with buttons & menu items:

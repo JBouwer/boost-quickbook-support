@@ -30,6 +30,11 @@
                     "default": "quickbook",
                     "markdownDescription": "The path to your `quickbook` executable."
                 },
+                "quickbook.preview.contentSecurityPolicy": {
+                    "type": "string",
+                    "default": "default-src 'none';",
+                    "markdownDescription": "The `CSP` part of the [`<meta http-equiv=\"Content-Security-Policy\" content=\"CSP\">`](https://developers.google.com/web/fundamentals/security/csp/) directive, to be injected into the preview HTML. See also the [VSCode Webview](https://code.visualstudio.com/api/extension-guides/webview#content-security-policy) documentation for more."
+                },
                 "quickbook.preview.strict": {
                     "type": "boolean",
                     "default": false,
@@ -67,7 +72,7 @@
                 "quickbook.preview.include.workspacePath": {
                     "type": "boolean",
                     "default": true,
-                    "markdownDescription": "Use the /workspace path/ path as the include path."
+                    "markdownDescription": "Use the _workspace path_ path as the include path."
                 },
                 "quickbook.preview.imageLocation": {
                     "type": "string",
