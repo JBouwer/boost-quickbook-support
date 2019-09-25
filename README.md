@@ -43,8 +43,7 @@ These settings are processed as follows:
 Also note that:
 * If they exist, the following local filesystem directories (and subdirectories) are trusted, 
   and added to the `localResourceRoots` of the preview `Webview`:
-    * The _workspace directory_.
-    * The `out` subdirectory of the installed extension directory.
+    * The directory of the input file.
     * All settings-specified paths.
 * To use local filesystem resources (e.g. `CSS` file, or _Boost_ directory), 
   prepend each with a `vscode-resource:` scheme;  

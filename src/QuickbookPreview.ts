@@ -10,7 +10,7 @@ class Settings
     readonly strContentSecurityPolicy: string;
     readonly localResourceRoots: vscode.Uri[] = [];
     
-    constructor()
+    constructor(pathSourceFile: string)
     {
         let config = vscode.workspace.getConfiguration('quickbook');
         
@@ -26,8 +26,7 @@ class Settings
                 ? ' --include-path "' + vscode.workspace.workspaceFolders[0].uri.fsPath + '"'
                 : '';
         
-        const self = this;
-        function strSetting(section: string, option: string, processStringAsPath: boolean = false): string
+        function strSetting(section: string, option: string, localResourceRoots?: vscode.Uri[] ): string
         {
             let v = config.get(section);
             if(v && !!v)
@@ -39,7 +38,7 @@ class Settings
                     case 'string': 
                     {
                         let setting: string = v.toString();
-                        if(processStringAsPath)
+                        if(localResourceRoots)
                         {
                             // Check for existence of path - if not, try by prepending the workspace folders..
                             // ... use the first one that result in a successful 'exist', otherwise use as specified.
@@ -57,45 +56,71 @@ class Settings
                             }
                             
                             // Attempt to parse the setting as an URI - if fail interpret it as a filesystem path.
-                            let uriSetting:vscode.Uri;
+                            let getDir = (strPath: string) => {
+                                if(fs.existsSync(strPath) && fs.lstatSync(strPath).isFile())
+                                {
+                                    return path.dirname(strPath);
+                                }
+                                else
+                                {
+                                    return strPath;
+                                }
+                            }
+                            
+                            let uriSetting:vscode.Uri | undefined;
                             try{
-                                uriSetting = vscode.Uri.parse(path.dirname(setting), true);
+                                uriSetting = vscode.Uri.parse(setting, true);
                                 // Apparently 'file:' scheme is fine.
                                 // uriSetting = uriSetting.with({ scheme: 'file' });
+                                let scheme = uriSetting.scheme.toLowerCase();
+                                if(scheme == 'vscode-resource' ||
+                                   scheme == 'file' )
+                                {
+                                    let pathSetting = getDir(uriSetting.path);
+                                    uriSetting = uriSetting.with({ path: pathSetting });
+                                }
                             } catch(err)
                             {
-                                uriSetting = vscode.Uri.file(path.dirname(setting));
+                                uriSetting = vscode.Uri.file(getDir(setting));
                             }
                             
                             // Add the directory to the 'localResourceRoots' array.
                             // Note that this by itself will not allow the VSCode Webview to access local resources...
                             // ... they need to be accessed with the 'vscode-resource:' scheme.
                             // See: https://code.visualstudio.com/api/extension-guides/webview#loading-local-content
-                            self.localResourceRoots.push(uriSetting);
+                            if(uriSetting)
+                            {
+                                localResourceRoots.push(uriSetting);
+                            }
                         }
                         
                         return ' ' + option + ' "' + setting + '"';
                     }
+                    
                     default: return '';
                 }
             }
             else return '';
         }
         
+        // Read settings & build a command line from them
+        // Also collect 'localResourceRoots' directories when specified.
         this.strOptions  = strSetting('preview.strict', '--strict')
                          + strSetting('preview.noSelfLinkedHeaders', '--no-self-linked-headers')
                          + strSetting('preview.indent', '--indent')
                          + strSetting('preview.lineWidth', '--linewidth')
                          + strSetting('preview.defineMacro', '--define')
                          + ( strPathIncludeWorkspace.length ? strPathIncludeWorkspace
-                                                            : strSetting('preview.include.path', '--include-path', true))
-                         + strSetting('preview.imageLocation', '--image-location', true)
-                         + strSetting('preview.boostRootPath', '--boost-root-path', true)
-                         + strSetting('preview.CSSPath', '--css-path', true)
-                         + strSetting('preview.graphicsPath', '--graphics-path', true)
+                                                            : strSetting('preview.include.path', '--include-path', this.localResourceRoots))
+                         + strSetting('preview.imageLocation', '--image-location', this.localResourceRoots)
+                         + strSetting('preview.boostRootPath', '--boost-root-path', this.localResourceRoots)
+                         + strSetting('preview.CSSPath', '--css-path', this.localResourceRoots)
+                         + strSetting('preview.graphicsPath', '--graphics-path', this.localResourceRoots)
                          ;
+        // Add directory of source file to 'localResourceRoots'.
+        let uriSourceFile = vscode.Uri.parse('vscode-resource:' + path.dirname(pathSourceFile), false);
+        this.localResourceRoots.push( uriSourceFile );
     }
-    
 };
 
 export class QuickbookPreview
@@ -187,11 +212,12 @@ export class QuickbookPreview
         // Inject Security Policy
         let strSecurityPolicy = `<meta http-equiv="Content-Security-Policy" content="${strContentSP}">`;
         const regexHead = /\<head\>(.*)\<\/head\>/;
-        return contents.replace(regexHead, '<head>' + strSecurityPolicy + '$1</head>');
+        contents =  contents.replace(regexHead, '<head>' + strSecurityPolicy + '$1</head>');
         
         // ?Possible?
         // Scan the html and update every 'file:' URI to the 'vscode-resource:' scheme,
         // using 1.38's webview.asWebviewUri
+        return contents;
     }
     
     protected setPreview(title: string, contents: string, urisResourceRoots: vscode.Uri[])
@@ -277,7 +303,7 @@ export class QuickbookPreview
         
         const pathSourceFile = txtEditor.document.fileName;
         const title = "Preview " + path.basename( pathSourceFile );
-        const settings = new Settings();
+        const settings = new Settings(pathSourceFile);
         
         exists(txtEditor.document.fileName).then( (pathFileSource: string) => {
             let commandLine = `${settings.strPathToExecutable}${settings.strOptions} --output-format onehtml --output-file "${self.strPathPreview_}" "${pathFileSource}" `;
