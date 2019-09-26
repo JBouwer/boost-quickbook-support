@@ -14,15 +14,18 @@ class Settings
     {
         let config = vscode.workspace.getConfiguration('quickbook');
         
+        function getSetting<T>(section: string, defaultVal: T): T
+        {
+            
+            let setting: T | undefined = config.get(section);
+            return setting ? setting : defaultVal;
+        }
+        
         let strPathToExecutable: string | undefined = config.get('preview.pathToExecutable');
         this.strPathToExecutable = (strPathToExecutable && fs.existsSync(strPathToExecutable)) ? strPathToExecutable : 'quickbook';
         
-        let strCSP: string | undefined = config.get('preview.contentSecurityPolicy');
-        this.strContentSecurityPolicy = strCSP ? strCSP : "default-src 'none';";
-        
-        let pathIncludeWorkspace: boolean | undefined = config.get('preview.include.workspacePath');
         let strPathIncludeWorkspace : string = 
-            (pathIncludeWorkspace && !! pathIncludeWorkspace && vscode.workspace.workspaceFolders)
+            (getSetting<boolean>('preview.include.workspacePath', false) && vscode.workspace.workspaceFolders)
                 ? ' --include-path "' + vscode.workspace.workspaceFolders[0].uri.fsPath + '"'
                 : '';
         
@@ -56,7 +59,7 @@ class Settings
                             }
                             
                             // Attempt to parse the setting as an URI - if fail interpret it as a filesystem path.
-                            let getDir = (strPath: string) => {
+                            const getDir = (strPath: string) => {
                                 if(fs.existsSync(strPath) && fs.lstatSync(strPath).isFile())
                                 {
                                     return path.dirname(strPath);
@@ -120,6 +123,10 @@ class Settings
         // Add directory of source file to 'localResourceRoots'.
         let uriSourceFile = vscode.Uri.parse('vscode-resource:' + path.dirname(pathSourceFile), false);
         this.localResourceRoots.push( uriSourceFile );
+        
+        // Security settings
+        this.strContentSecurityPolicy = getSetting<string>('preview.security.contentSecurityPolicy',
+                                                           "default-src 'none';");
     }
 };
 
@@ -207,10 +214,10 @@ export class QuickbookPreview
         channel.show(true);
     }
     
-    protected processPreview( contents: string, strContentSP: string)
+    protected processPreview(contents: string, settings: Settings)
     {
         // Inject Security Policy
-        let strSecurityPolicy = `<meta http-equiv="Content-Security-Policy" content="${strContentSP}">`;
+        let strSecurityPolicy = `<meta http-equiv="Content-Security-Policy" content="${settings.strContentSecurityPolicy}">`;
         const regexHead = /\<head\>(.*)\<\/head\>/;
         contents =  contents.replace(regexHead, '<head>' + strSecurityPolicy + '$1</head>');
         
@@ -313,7 +320,7 @@ export class QuickbookPreview
             self.setOutputChannel(...output);
             return readFile( self.strPathPreview_, {} );
         }).then((strContents) => {
-            let strProcessedContents = self.processPreview( strContents, settings.strContentSecurityPolicy );
+            let strProcessedContents = self.processPreview( strContents, settings );
             self.setPreview( title, strProcessedContents , settings.localResourceRoots);
         }).catch((messages: string[]) => {
             self.setOutputChannel(...messages);

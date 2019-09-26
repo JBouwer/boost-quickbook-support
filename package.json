@@ -25,45 +25,25 @@
         "configuration": {
             "title": "Boost Quickbook Support",
             "properties": {
-                "quickbook.preview.pathToExecutable": {
+                "quickbook.preview.boostRootPath": {
                     "type": "string",
-                    "default": "quickbook",
-                    "markdownDescription": "The path to your `quickbook` executable."
+                    "markdownDescription": "Path to Boost root, or absolute URL.  \nPassed with `--boost-root-path` option to executable."
                 },
-                "quickbook.preview.contentSecurityPolicy": {
+                "quickbook.preview.CSSPath": {
                     "type": "string",
-                    "default": "default-src vscode-resource:;",
-                    "markdownDescription": "The `CSP` part of the [`<meta http-equiv=\"Content-Security-Policy\" content=\"CSP\">`](https://developers.google.com/web/fundamentals/security/csp/) directive, to be injected into the preview HTML. See also the [VSCode Webview](https://code.visualstudio.com/api/extension-guides/webview#content-security-policy) documentation for more."
-                },
-                "quickbook.preview.strict": {
-                    "type": "boolean",
-                    "default": false,
-                    "markdownDescription": "Enable `--strict` mode."
-                },
-                "quickbook.preview.noSelfLinkedHeaders": {
-                    "type": "boolean",
-                    "default": false,
-                    "markdownDescription": "Stop headers linking to themselves. \n(Pass `--no-self-linked-headers` option)."
-                },
-                "quickbook.preview.indent": {
-                    "type": [
-                        "number",
-                        "null"
-                    ],
-                    "default": null,
-                    "markdownDescription": "Passed with `--indent` option."
-                },
-                "quickbook.preview.lineWidth": {
-                    "type": [
-                        "number",
-                        "null"
-                    ],
-                    "default": null,
-                    "markdownDescription": "Passed with `--linewidth` option."
+                    "markdownDescription": "Path to CSS file or absolute URL.  \nPassed with `--css-path` option to executable."
                 },
                 "quickbook.preview.defineMacro": {
                     "type": "string",
                     "markdownDescription": "Predefined macro.  \nPassed with `--define` option to executable."
+                },
+                "quickbook.preview.graphicsPath": {
+                    "type": "string",
+                    "markdownDescription": "Path to graphics directory or absolute URL.  \nPassed with `--graphics-path` option to executable."
+                },
+                "quickbook.preview.imageLocation": {
+                    "type": "string",
+                    "markdownDescription": "Path to locate images.  \nPassed with `--image-location` option to executable."
                 },
                 "quickbook.preview.include.path": {
                     "type": "string",
@@ -74,21 +54,41 @@
                     "default": true,
                     "markdownDescription": "Use the _workspace path_ path as the include path."
                 },
-                "quickbook.preview.imageLocation": {
-                    "type": "string",
-                    "markdownDescription": "Path to locate images.  \nPassed with `--image-location` option to executable."
+                "quickbook.preview.indent": {
+                    "type": [
+                        "number",
+                        "null"
+                    ],
+                    "default": null,
+                    "markdownDescription": "Passed with `--indent` option."
                 },
-                "quickbook.preview.boostRootPath": {
-                    "type": "string",
-                    "markdownDescription": "Path to Boost root, or absolute URL.  \nPassed with `--boost-root-path` option to executable."
+                "quickbook.preview.noSelfLinkedHeaders": {
+                    "type": "boolean",
+                    "default": false,
+                    "markdownDescription": "Stop headers linking to themselves. \n(Pass `--no-self-linked-headers` option)."
                 },
-                "quickbook.preview.CSSPath": {
-                    "type": "string",
-                    "markdownDescription": "Path to CSS file or absolute URL.  \nPassed with `--css-path` option to executable."
+                "quickbook.preview.lineWidth": {
+                    "type": [
+                        "number",
+                        "null"
+                    ],
+                    "default": null,
+                    "markdownDescription": "Passed with `--linewidth` option."
                 },
-                "quickbook.preview.graphicsPath": {
+                "quickbook.preview.pathToExecutable": {
                     "type": "string",
-                    "markdownDescription": "Path to graphics directory or absolute URL.  \nPassed with `--graphics-path` option to executable."
+                    "default": "quickbook",
+                    "markdownDescription": "The path to your `quickbook` executable."
+                },
+                "quickbook.preview.security.contentSecurityPolicy": {
+                    "type": "string",
+                    "default": "default-src vscode-resource:;",
+                    "markdownDescription": "The `CSP` part of the [`<meta http-equiv=\"Content-Security-Policy\" content=\"CSP\">`](https://developers.google.com/web/fundamentals/security/csp/) directive, to be injected into the preview HTML. See also the [VSCode Webview](https://code.visualstudio.com/api/extension-guides/webview#content-security-policy) documentation for more."
+                },
+                "quickbook.preview.strict": {
+                    "type": "boolean",
+                    "default": false,
+                    "markdownDescription": "Enable `--strict` mode."
                 }
             }
         },

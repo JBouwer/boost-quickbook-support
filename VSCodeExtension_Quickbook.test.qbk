@@ -161,6 +161,14 @@ Image below
 
 [$images/boost-quickbook-support.svg]
 
+Image above & cat below
+
+[$https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy.gif]
+
+Cat image above & Absolute Path Image below
+
+__ABSOLUTE_PATH_IMAGE__
+
 Image above
 [endsect]
 
