@@ -3,15 +3,87 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as cp from 'child_process';
 
+class UniUri
+{
+    public readonly strPath: string;
+    public readonly uri: vscode.Uri;
+    public readonly isLocal: boolean;
+    
+    // Only meaningful when 'isLocal == true'
+    public readonly isRelative:boolean;
+    
+    constructor(str: string)
+    {
+        this.strPath = str;
+        let uriSetting:vscode.Uri | undefined;
+        try{
+            this.uri = vscode.Uri.parse(str, true);
+            if( ['', 'file', 'vscode-resource'].indexOf(this.uri.scheme) >= 0 )
+            {
+                this.isLocal = true;
+            }
+            else
+            {
+                this.isLocal = false;
+            }
+        } catch(err)
+        {
+            this.uri = vscode.Uri.file(str);
+            this.isLocal = true;
+        }
+        
+        if(this.isLocal)
+        {
+            this.isRelative = !path.isAbsolute(str);
+        }
+        else
+        {
+            this.isRelative = false;
+        }
+    }
+    
+    // When isLocal == true, determine if the resource exists.
+    public exists() :boolean
+    {
+        if(this.isLocal)
+        {
+            return fs.existsSync(this.strPath);
+        }
+        else return false;
+    }
+    
+    // When isLocal == true, returns the directory
+    public directory(): string
+    {
+        if(this.exists())
+        {
+            if(fs.lstatSync(this.strPath).isFile())
+            {
+                return path.dirname(this.strPath);
+            }
+            else
+            {
+                return this.strPath;
+            }
+        }
+        else return '';
+    }
+};
+
 class Settings
 {
+    readonly strPathSourceFile: string;
     readonly strPathToExecutable: string;
     readonly strOptions: string;
     readonly strContentSecurityPolicy: string;
     readonly localResourceRoots: vscode.Uri[] = [];
+    readonly processImagePathRelative: boolean;
+    readonly processImagePathScheme: boolean;
     
     constructor(pathSourceFile: string)
     {
+        this.strPathSourceFile = pathSourceFile;
+        
         let config = vscode.workspace.getConfiguration('quickbook');
         
         function getSetting<T>(section: string, defaultVal: T): T
@@ -53,7 +125,7 @@ class Settings
                                     if(fs.existsSync(pathTry))
                                     {
                                         setting = pathTry;
-                                        continue;
+                                        break;
                                     }
                                 }
                             }
@@ -127,6 +199,9 @@ class Settings
         // Security settings
         this.strContentSecurityPolicy = getSetting<string>('preview.security.contentSecurityPolicy',
                                                            "default-src 'none';");
+        
+        this.processImagePathRelative = getSetting<boolean>('preview.security.processImagePathRelative', false);
+        this.processImagePathScheme = getSetting<boolean>('preview.security.processImagePathScheme', false);
     }
 };
 
@@ -221,9 +296,39 @@ export class QuickbookPreview
         const regexHead = /\<head\>(.*)\<\/head\>/;
         contents =  contents.replace(regexHead, '<head>' + strSecurityPolicy + '$1</head>');
         
-        // ?Possible?
-        // Scan the html and update every 'file:' URI to the 'vscode-resource:' scheme,
-        // using 1.38's webview.asWebviewUri
+        if(settings.processImagePathRelative || settings.processImagePathScheme)
+        {
+            const regexImageSource = /(?<pre>\<span\s+class\s*=\s*\"inlinemediaobject\"\>\<img\s+src\s*=\s*\")(?<uri>.+?)(?<post>\".*?\>)/gs;
+            contents = contents.replace(regexImageSource, (match, ...args) => 
+                    {
+                        let groups = args.pop();
+                        
+                        let uniUriSpecified = new UniUri(groups.uri);
+                        // Only process local URI's
+                        if(uniUriSpecified.isLocal)
+                        {
+                            let uriWork = uniUriSpecified.uri;
+                            if(settings.processImagePathScheme)
+                            {
+                                uriWork = uriWork.with({scheme: 'vscode-resource'});
+                            }
+                            
+                            if(settings.processImagePathRelative && uniUriSpecified.isRelative)
+                            {
+                                let strPathRoot = path.dirname(settings.strPathSourceFile);
+                                uriWork = uriWork.with({ path: path.join(strPathRoot, groups.uri) });
+                            }
+                            
+                            return groups.pre + uriWork.toString()+ groups.post;
+                        }
+                        else
+                        {
+                            // Ignore
+                            return match;
+                        }
+                    });
+        }
+        
         return contents;
     }
     

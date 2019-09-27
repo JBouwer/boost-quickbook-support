@@ -5,7 +5,7 @@
     "description": "Syntax highlighting & simple preview for Boost Quickbook",
     "license": "BSL-1.0",
     "icon": "images/boost-quickbook-support.png",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "engines": {
         "vscode": "^1.37.0"
     },
@@ -84,6 +84,16 @@
                     "type": "string",
                     "default": "default-src vscode-resource:;",
                     "markdownDescription": "The `CSP` part of the [`<meta http-equiv=\"Content-Security-Policy\" content=\"CSP\">`](https://developers.google.com/web/fundamentals/security/csp/) directive, to be injected into the preview HTML. See also the [VSCode Webview](https://code.visualstudio.com/api/extension-guides/webview#content-security-policy) documentation for more."
+                },
+                "quickbook.preview.security.processImagePathRelative": {
+                    "type": "boolean",
+                    "default": true,
+                    "markdownDescription": "Enable post-processing of local _relative_ image paths, to _relative_ to the output file."
+                },
+                "quickbook.preview.security.processImagePathScheme": {
+                    "type": "boolean",
+                    "default": true,
+                    "markdownDescription": "Enable post-processing of local image paths to the `vscode-resource:` scheme."
                 },
                 "quickbook.preview.strict": {
                     "type": "boolean",
