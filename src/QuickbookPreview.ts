@@ -96,11 +96,6 @@ class Settings
         let strPathToExecutable: string | undefined = config.get('preview.pathToExecutable');
         this.strPathToExecutable = (strPathToExecutable && fs.existsSync(strPathToExecutable)) ? strPathToExecutable : 'quickbook';
         
-        let strPathIncludeWorkspace : string = 
-            (getSetting<boolean>('preview.include.workspacePath', false) && vscode.workspace.workspaceFolders)
-                ? ' --include-path "' + vscode.workspace.workspaceFolders[0].uri.fsPath + '"'
-                : '';
-        
         function strSetting(section: string, option: string, localResourceRoots?: vscode.Uri[] ): string
         {
             let v = config.get(section);
@@ -178,6 +173,18 @@ class Settings
             else return '';
         }
         
+        // Include path:
+        // First, check 'preview.include.path'.
+        // If empty, then check 'preview.include.workspacePath'
+        let strPathInclude: string = strSetting('preview.include.path', '--include-path', this.localResourceRoots);
+        if( (strPathInclude.length == 0)
+           && getSetting<boolean>('preview.include.workspacePath', false)
+           && vscode.workspace.workspaceFolders
+          )
+        {
+            strPathInclude = ' --include-path "' + vscode.workspace.workspaceFolders[0].uri.fsPath + '"';
+        }
+        
         // Read settings & build a command line from them
         // Also collect 'localResourceRoots' directories when specified.
         this.strOptions  = strSetting('preview.strict', '--strict')
@@ -185,8 +192,7 @@ class Settings
                          + strSetting('preview.indent', '--indent')
                          + strSetting('preview.lineWidth', '--linewidth')
                          + strSetting('preview.defineMacro', '--define')
-                         + ( strPathIncludeWorkspace.length ? strPathIncludeWorkspace
-                                                            : strSetting('preview.include.path', '--include-path', this.localResourceRoots))
+                         + strPathInclude
                          + strSetting('preview.imageLocation', '--image-location', this.localResourceRoots)
                          + strSetting('preview.boostRootPath', '--boost-root-path', this.localResourceRoots)
                          + strSetting('preview.CSSPath', '--css-path', this.localResourceRoots)

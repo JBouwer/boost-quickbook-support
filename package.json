@@ -47,12 +47,12 @@
                 },
                 "quickbook.preview.include.path": {
                     "type": "string",
-                    "markdownDescription": "Include path.  \nPassed with `--include-path` option to executable."
+                    "markdownDescription": "Include path. This will override the `quickbook.preview.include.workspacePath` setting.  \nPassed with `--include-path` option to executable."
                 },
                 "quickbook.preview.include.workspacePath": {
                     "type": "boolean",
                     "default": true,
-                    "markdownDescription": "Use the _workspace path_ path as the include path."
+                    "markdownDescription": "Use the first _workspace path_ as the include path. This will be overridden when the `quickbook.preview.include.path` setting is also specified.  \n(Passed with `--include-path` option to executable.)"
                 },
                 "quickbook.preview.indent": {
                     "type": [

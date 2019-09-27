@@ -23,7 +23,8 @@ Quickbook Documentation].
     \] An escaped \]
 ]
 
-[/import Macros.qbk]
+[include VSCodeExtension_Quickbook_include.test.qbk]
+[/include VSCodeExtension_Quickbook_include_2.test.qbk]
 
 General text, "double quoted text", 'single quoted text',
 and `inline code`.
