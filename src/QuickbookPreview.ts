@@ -9,9 +9,6 @@ class UniUri
     public readonly uri: vscode.Uri;
     public readonly isLocal: boolean;
     
-    // Only meaningful when 'isLocal == true'
-    public readonly isRelative:boolean;
-    
     constructor(str: string)
     {
         this.strPath = str;
@@ -31,15 +28,16 @@ class UniUri
             this.uri = vscode.Uri.file(str);
             this.isLocal = true;
         }
-        
+    }
+    
+    // Only meaningful when 'isLocal == true'
+    public isRelative(): boolean
+    {
         if(this.isLocal)
         {
-            this.isRelative = !path.isAbsolute(str);
+            return !path.isAbsolute(this.uri.fsPath);
         }
-        else
-        {
-            this.isRelative = false;
-        }
+        else return false
     }
     
     // When isLocal == true, determine if the resource exists.
@@ -47,7 +45,7 @@ class UniUri
     {
         if(this.isLocal)
         {
-            return fs.existsSync(this.strPath);
+            return fs.existsSync(this.uri.fsPath);
         }
         else return false;
     }
@@ -57,16 +55,21 @@ class UniUri
     {
         if(this.exists())
         {
-            if(fs.lstatSync(this.strPath).isFile())
+            if(fs.lstatSync(this.uri.fsPath).isFile())
             {
-                return path.dirname(this.strPath);
+                return path.dirname(this.uri.fsPath);
             }
             else
             {
-                return this.strPath;
+                return this.uri.fsPath;
             }
         }
         else return '';
+    }
+    
+    public uriDirectory(): vscode.Uri
+    {
+        return this.uri.with({ path:this.directory() });
     }
 };
 
@@ -79,6 +82,11 @@ class Settings
     readonly localResourceRoots: vscode.Uri[] = [];
     readonly processImagePathRelative: boolean;
     readonly processImagePathScheme: boolean;
+    
+    readonly trustSourceFileDirectory: boolean;
+    readonly trustWorkspaceDirectories: boolean;
+    readonly trustSpecifiedDirectories: boolean;
+    readonly trustAdditionalDirectories: string[];
     
     constructor(pathSourceFile: string)
     {
@@ -96,6 +104,39 @@ class Settings
         let strPathToExecutable: string | undefined = config.get('preview.pathToExecutable');
         this.strPathToExecutable = (strPathToExecutable && fs.existsSync(strPathToExecutable)) ? strPathToExecutable : 'quickbook';
         
+        // Check for existence of path - if not, try by prepending the workspace folders..
+        // ... use the first one that result in a successful 'exist', otherwise use as specified.
+        function strPathFittedToWorkspace(pathIn: string): string
+        {
+            if(!fs.existsSync(pathIn) && vscode.workspace.workspaceFolders)
+            {
+                for(let folder of vscode.workspace.workspaceFolders)
+                {
+                    let pathTry = path.join(folder.uri.fsPath, pathIn);
+                    if(fs.existsSync(pathTry))
+                    {
+                        return pathTry;
+                        break;
+                    }
+                }
+            }
+            
+            return pathIn;
+        }
+        
+        // Function to determine directory if path is a file.
+        function getDir(strPath: string)
+        {
+            if(fs.existsSync(strPath) && fs.lstatSync(strPath).isFile())
+            {
+                return path.dirname(strPath);
+            }
+            else
+            {
+                return strPath;
+            }
+        }
+        
         function strSetting(section: string, option: string, localResourceRoots?: vscode.Uri[] ): string
         {
             let v = config.get(section);
@@ -112,56 +153,16 @@ class Settings
                         {
                             // Check for existence of path - if not, try by prepending the workspace folders..
                             // ... use the first one that result in a successful 'exist', otherwise use as specified.
-                            if(!fs.existsSync(setting) && vscode.workspace.workspaceFolders)
-                            {
-                                for(let folder of vscode.workspace.workspaceFolders)
-                                {
-                                    let pathTry = path.join(folder.uri.fsPath, setting);
-                                    if(fs.existsSync(pathTry))
-                                    {
-                                        setting = pathTry;
-                                        break;
-                                    }
-                                }
-                            }
+                            setting = strPathFittedToWorkspace(setting);
                             
                             // Attempt to parse the setting as an URI - if fail interpret it as a filesystem path.
-                            const getDir = (strPath: string) => {
-                                if(fs.existsSync(strPath) && fs.lstatSync(strPath).isFile())
-                                {
-                                    return path.dirname(strPath);
-                                }
-                                else
-                                {
-                                    return strPath;
-                                }
-                            }
-                            
-                            let uriSetting:vscode.Uri | undefined;
-                            try{
-                                uriSetting = vscode.Uri.parse(setting, true);
-                                // Apparently 'file:' scheme is fine.
-                                // uriSetting = uriSetting.with({ scheme: 'file' });
-                                let scheme = uriSetting.scheme.toLowerCase();
-                                if(scheme == 'vscode-resource' ||
-                                   scheme == 'file' )
-                                {
-                                    let pathSetting = getDir(uriSetting.path);
-                                    uriSetting = uriSetting.with({ path: pathSetting });
-                                }
-                            } catch(err)
-                            {
-                                uriSetting = vscode.Uri.file(getDir(setting));
-                            }
+                            let uniUriSetting = new UniUri(setting);
                             
                             // Add the directory to the 'localResourceRoots' array.
                             // Note that this by itself will not allow the VSCode Webview to access local resources...
                             // ... they need to be accessed with the 'vscode-resource:' scheme.
                             // See: https://code.visualstudio.com/api/extension-guides/webview#loading-local-content
-                            if(uriSetting)
-                            {
-                                localResourceRoots.push(uriSetting);
-                            }
+                            localResourceRoots.push(uniUriSetting.uriDirectory());
                         }
                         
                         return ' ' + option + ' "' + setting + '"';
@@ -319,7 +320,7 @@ export class QuickbookPreview
                                 uriWork = uriWork.with({scheme: 'vscode-resource'});
                             }
                             
-                            if(settings.processImagePathRelative && uniUriSpecified.isRelative)
+                            if(settings.processImagePathRelative && uniUriSpecified.isRelative())
                             {
                                 let strPathRoot = path.dirname(settings.strPathSourceFile);
                                 uriWork = uriWork.with({ path: path.join(strPathRoot, groups.uri) });
