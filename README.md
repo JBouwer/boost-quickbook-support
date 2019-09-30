@@ -40,15 +40,50 @@ These settings are processed as follows:
 1. Otherwise the specified path is prepended in turn by each of the workspace directories - if it exists, it is used.
 1. Otherwise the specified path is used as specified.
 
-Also note that:
-* If they exist, the following local filesystem directories (and subdirectories) are trusted, 
-  and added to the `localResourceRoots` of the preview `Webview`:
-    * The directory of the input file.
-    * All settings-specified paths.
-* To use local filesystem resources (e.g. `CSS` file, or _Boost_ directory), 
-  prepend each with a `vscode-resource:` scheme;  
-  e.g. `vscode-resource:/path/to/my/css_file.css`.  
-  See the  [WebView API documentation](https://code.visualstudio.com/api/extension-guides/webview#loading-local-content) for more on this subject.
+Also note that to use local filesystem resources (e.g. `CSS` file, or _Boost_ directory), 
+prepend each with a `vscode-resource:` scheme;  
+e.g. `vscode-resource:/path/to/my/css_file.css`.  
+
+Also see [Security](#Security) below for more on this, and related settings.
+
+## Security
+The [WebView API documentation](https://code.visualstudio.com/api/extension-guides/webview) component
+used to generate the preview panel are very restrictive with regards to what content can be displayed.
+In short:
+- Any external media needs to be explicitly _trusted_ with the _"Content Security Policy"_.
+- Local media:
+    - Needs to be accessed with a special `vscode-resource:` scheme.
+    - The scheme also needs to be explicitly _trusted_ with the _"Content Security Policy"_.
+    - The root directories that contain local media, need to be explicitly _trusted_, by adding them to 
+      [`WebviewOptions`](https://code.visualstudio.com/api/references/vscode-api#WebviewOptions)`.localResourceRoots`.
+
+See the  [WebView API documentation](https://code.visualstudio.com/api/extension-guides/webview#loading-local-content) for more on this subject.
+
+This extension provides the following features to accommodate the above requirements.
+- The "Content-Security-Policy" can be adjusted with the `quickbook.preview.security.contentSecurityPolicy` setting.  
+  The setting results into the `CSP` part of the
+  [`<meta http-equiv=\"Content-Security-Policy\" content=\"CSP\">`](https://developers.google.com/web/fundamentals/security/csp/) directive,
+  and is injected into the preview HTML, before displaying it in the `Webview`.  
+  > This setting defaults to "`vscode-resource:`" (needed to access local media).
+
+- The extension can temporarily adjust _local_ image URI's (i.e. Quickbook `[$ ...] directives) for display in the preview:
+    - The `quickbook.preview.security.processImagePathScheme` setting (defaulting to `true`),
+      will temporarily adjust the scheme to "`vscode-resource:`".
+    - The `quickbook.preview.security.processImagePathRelative` setting (defaulting to `true`),
+      will temporarily root _relative_ image paths to the directory of the source Quickbook file
+      (i.e. the file that is being _previewed_).
+
+- The following settings will add their respected directories to the trusted list ([`WebviewOptions`](https://code.visualstudio.com/api/references/vscode-api#WebviewOptions)`.localResourceRoots`):
+    - `quickbook.preview.security.trustSourceFileDirectory`:  
+      When enabled (default), the directory of the source file (i.e. the file being previewed) is trusted.
+    - `quickbook.preview.security.trustWorkspaceDirectories`:  
+      When enabled (default), all of the workspace directories are trusted.
+    - `quickbook.preview.security.trustSpecifiedDirectories`:  
+      When enabled (default), any directory-paths specified in the settings above, are trusted.
+      This includes the paths specified under `quickbook.preview.`: i.e. 
+      `boostRootPath`, `CSSPath`, `graphicsPath`, `imageLocation` & `include.path/workspacePath`.
+    - `quickbook.preview.security.trustAdditionalDirectories`:  
+      An array of additional paths to trust.
 
 ## Known Issues
 
@@ -67,20 +102,20 @@ e.g.
     is simply specified inside the `language-configuration.json` file.
     I don't know how to do specify the concept of an *escaped* character in there - if possible at all.  
 
-- The *preview* panel does not correctly display user-images.
-
 ## FAQ
 Some answers to potential problems can be found [here](FAQ.md).
 
 ## Release Notes
 
 ### 0.0.4
-- Added _Content Security Policy_, (Issue #3), and associated `quickbook.preview.security.contentSecurityPolicy` setting.
 - Modified settings functionality to reload with every _preview_ operation (no more _Reload Window_ necessary).
-- Partially fixed Issue #2, with support for `CSS` file setting & support graphics (not user-images).
-    > Note that at the time of writing I needed to set the _Graphics Path_ setting to:
-    > `vscode-resource:/BOOST_PATH/doc/src/images/` for this to work correctly - setting the _Boost Root Directory_
-    > only did not resolve to the correct image directory.
+- Added _Content Security Policy_, (Issue #3), and associated `quickbook.preview.security.contentSecurityPolicy` setting.
+- Seemingly fixed Issue #2, with support for `CSS` file setting, support graphics & user-images.
+    > Note that:
+    > - At the time of writing I needed to set my _Graphics Path_ setting to:
+    > `vscode-resource:/BOOST_PATH/doc/src/images/` for Boost graphics to resolve to the correct path - setting
+    > the _Boost Root Directory_ was not adequate.
+- Explicit _trusting_ of local directories for preview (See [Security](#Security) above.)
 
 ### 0.0.3
 - Fixed Comments that surround template expansion (and other comment) patterns.

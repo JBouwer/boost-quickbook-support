@@ -35,7 +35,7 @@ class UniUri
     {
         if(this.isLocal)
         {
-            return !path.isAbsolute(this.uri.fsPath);
+            return !path.isAbsolute(this.strPath);
         }
         else return false
     }
@@ -103,6 +103,17 @@ class Settings
         
         let strPathToExecutable: string | undefined = config.get('preview.pathToExecutable');
         this.strPathToExecutable = (strPathToExecutable && fs.existsSync(strPathToExecutable)) ? strPathToExecutable : 'quickbook';
+        
+        // Security settings
+        this.strContentSecurityPolicy = getSetting<string>('preview.security.contentSecurityPolicy',
+                                                           "default-src 'none';");
+        this.processImagePathRelative = getSetting<boolean>('preview.security.processImagePathRelative', false);
+        this.processImagePathScheme = getSetting<boolean>('preview.security.processImagePathScheme', false);
+        
+        this.trustSourceFileDirectory = getSetting<boolean>('preview.security.trustSourceFileDirectory', false);
+        this.trustWorkspaceDirectories = getSetting<boolean>('preview.security.trustWorkspaceDirectories', false);
+        this.trustSpecifiedDirectories = getSetting<boolean>('preview.security.trustSpecifiedDirectories', false);
+        this.trustAdditionalDirectories = getSetting<string[]>('preview.security.trustAdditionalDirectories', []);
         
         // Check for existence of path - if not, try by prepending the workspace folders..
         // ... use the first one that result in a successful 'exist', otherwise use as specified.
@@ -177,14 +188,20 @@ class Settings
         // Include path:
         // First, check 'preview.include.path'.
         // If empty, then check 'preview.include.workspacePath'
-        let strPathInclude: string = strSetting('preview.include.path', '--include-path', this.localResourceRoots);
+        let strPathInclude: string = getSetting<string>('preview.include.path', '');
         if( (strPathInclude.length == 0)
            && getSetting<boolean>('preview.include.workspacePath', false)
            && vscode.workspace.workspaceFolders
           )
         {
-            strPathInclude = ' --include-path "' + vscode.workspace.workspaceFolders[0].uri.fsPath + '"';
+            strPathInclude = vscode.workspace.workspaceFolders[0].uri.fsPath;
         }
+        if(this.trustSpecifiedDirectories && strPathInclude.length >= 0)
+        {
+            this.localResourceRoots.push(new UniUri(strPathInclude).uri);
+        }
+        
+        strPathInclude = ' --include-path "' + strPathInclude + '"';
         
         // Read settings & build a command line from them
         // Also collect 'localResourceRoots' directories when specified.
@@ -194,21 +211,31 @@ class Settings
                          + strSetting('preview.lineWidth', '--linewidth')
                          + strSetting('preview.defineMacro', '--define')
                          + strPathInclude
-                         + strSetting('preview.imageLocation', '--image-location', this.localResourceRoots)
-                         + strSetting('preview.boostRootPath', '--boost-root-path', this.localResourceRoots)
-                         + strSetting('preview.CSSPath', '--css-path', this.localResourceRoots)
-                         + strSetting('preview.graphicsPath', '--graphics-path', this.localResourceRoots)
+                         + strSetting('preview.imageLocation', '--image-location',
+                                      this.trustSpecifiedDirectories ? this.localResourceRoots : undefined)
+                         + strSetting('preview.boostRootPath', '--boost-root-path',
+                                      this.trustSpecifiedDirectories ? this.localResourceRoots : undefined)
+                         + strSetting('preview.CSSPath', '--css-path',
+                                      this.trustSpecifiedDirectories ? this.localResourceRoots : undefined)
+                         + strSetting('preview.graphicsPath', '--graphics-path',
+                                      this.trustSpecifiedDirectories ? this.localResourceRoots : undefined)
                          ;
         // Add directory of source file to 'localResourceRoots'.
-        let uriSourceFile = vscode.Uri.parse('vscode-resource:' + path.dirname(pathSourceFile), false);
-        this.localResourceRoots.push( uriSourceFile );
+        if(this.trustSourceFileDirectory)
+        {
+            let uriSourceFile = vscode.Uri.parse('vscode-resource:' + path.dirname(pathSourceFile), false);
+            this.localResourceRoots.push( uriSourceFile );
+        }
         
-        // Security settings
-        this.strContentSecurityPolicy = getSetting<string>('preview.security.contentSecurityPolicy',
-                                                           "default-src 'none';");
+        if(this.trustAdditionalDirectories)
+        {
+            for(let dir of this.trustAdditionalDirectories)
+            {
+                let uniUriDir = new UniUri(strPathFittedToWorkspace(dir));
+                this.localResourceRoots.push( uniUriDir.uri );
+            }
+        }
         
-        this.processImagePathRelative = getSetting<boolean>('preview.security.processImagePathRelative', false);
-        this.processImagePathScheme = getSetting<boolean>('preview.security.processImagePathScheme', false);
     }
 };
 
