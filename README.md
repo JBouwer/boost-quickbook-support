@@ -68,12 +68,12 @@ This extension provides the following features to accommodate the above requirem
 
 - The extension can temporarily adjust _local_ image URI's (i.e. Quickbook `[$ ...] directives) for display in the preview:
     - The `quickbook.preview.security.processImagePathScheme` setting (defaulting to `true`),
-      will temporarily adjust the scheme to "`vscode-resource:`".
+      will allow the preview to temporarily adjust the scheme to "`vscode-resource:`".
     - The `quickbook.preview.security.processImagePathRelative` setting (defaulting to `true`),
-      will temporarily root _relative_ image paths to the directory of the source Quickbook file
+      will allow the preview to temporarily root _relative_ image paths to the directory of the source Quickbook file
       (i.e. the file that is being _previewed_).
 
-- The following settings will add their respected directories to the trusted list ([`WebviewOptions`](https://code.visualstudio.com/api/references/vscode-api#WebviewOptions)`.localResourceRoots`):
+- The following settings will add their respective directories to the trusted list ([`WebviewOptions`](https://code.visualstudio.com/api/references/vscode-api#WebviewOptions)`.localResourceRoots`):
     - `quickbook.preview.security.trustSourceFileDirectory`:  
       When enabled (default), the directory of the source file (i.e. the file being previewed) is trusted.
     - `quickbook.preview.security.trustWorkspaceDirectories`:  
