@@ -1,2 +1,5 @@
 [/ Simple include file]
 This text resides in the `include` file.
+
+[/ Simple import Macro for testing]
+[template templateProcessing[txt]`templateProcessing`--[txt]--`templateProcessing`]

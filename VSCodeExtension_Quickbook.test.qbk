@@ -3,6 +3,8 @@
     [quickbook 1.7]
 ]
 
+[import VSCodeExtension_Quickbook_include.test.qbk]
+
 These examples liberally adapted from the 
 [@http://www.boost.org/doc/html/quickbook.html
 Quickbook Documentation].
@@ -23,8 +25,16 @@ Quickbook Documentation].
     \] An escaped \]
 ]
 
+[section Include File testing]
 [include VSCodeExtension_Quickbook_include.test.qbk]
-[/include VSCodeExtension_Quickbook_include_2.test.qbk]
+[endsect]
+
+[section Import File testing]
+* [templateProcessing Text 1]
+* [templateProcessing Text 2]
+* [templateProcessing Text 3]
+
+[endsect]
 
 General text, "double quoted text", 'single quoted text',
 and `inline code`.
@@ -173,6 +183,16 @@ __ABSOLUTE_PATH_IMAGE__
 Image above
 [endsect]
 
+[section Macros & images]
+
+[? __MACRO_1__ `__MACRO_1__` is defined.]
+[?! __MACRO_1__ `__MACRO_1__` is not defined]
+
+[? __MACRO_2__ `__MACRO_2__` is defined.]
+[?! __MACRO_2__ `__MACRO_2__` is not defined]
+
+[endsect]
+
 [section Footnote]
 Footnote: [footnote A sample footnote]
 [endsect]
@@ -191,13 +211,13 @@ Conditional Generation:
 
 [section Block Level Elements]
 
-Ordered lists
+[heading Ordered lists]
 
 # One
 # Two
 # Three
 
-List Hierarchies
+[heading List Hierarchies]
 
 # One
 # Two
@@ -211,13 +231,13 @@ List Hierarchies
         # Four.a.ii
 # Five
 
-Unordered lists
+[heading Unordered lists]
 
 * First
 * Second
 * Third
 
-Mixed lists
+[heading Mixed lists]
 Mixed lists (ordered and unordered) are supported. Example:
 
 # One
@@ -228,7 +248,7 @@ Mixed lists (ordered and unordered) are supported. Example:
     * Three.c
 # Four
 
-Paragraphs in lists
+[heading Paragraphs in lists]
 
 * List item 1, paragraph 1
 
@@ -238,13 +258,13 @@ Paragraphs in lists
 
   List item 2, paragraph 2
 
-Explicit list tags
+[heading Explicit list tags]
 
 [ordered_list [item1][item2]]
 
 [itemized_list [item1][item2]]
 
-Code 
+[heading Code & Callouts]
 
 [!c++]
     #include <iostream>
@@ -263,7 +283,7 @@ Code
         return "foo-bar"; /*< return 'em, foo-bar man! >*/
     }
 
-Preformatted
+[heading Preformatted]
 
 [pre
 
@@ -275,18 +295,17 @@ Preformatted
 
 ]
 
-Blockquote
-
+[heading Blockquote]
 [:sometext...]
 
-Admonitions
+[heading Admonitions]
 [note This is a note]
 [tip This is a tip]
 [important This is important]
 [caution This is a caution]
 [warning This is a warning]
 
-Headings
+[heading Headings]
 [h1 Heading 1]
 [h2 Heading 2]
 [h3 Heading 3]
@@ -294,7 +313,7 @@ Headings
 [h5 Heading 5]
 [h6 Heading 6]
 
-Predefined Macros
+[heading Predefined Macros]
 
 Today's date: __DATE__
 
@@ -302,7 +321,7 @@ The current time: __TIME__
 
 Filename: "__FILENAME__"
 
-Nullary Templates
+[heading Nullary Templates]
 [template alpha[]'''&#945;''']
 [template beta[]'''&#946;''']
 Some squigles...[*[alpha][beta]]
@@ -310,13 +329,13 @@ Some squigles...[*[alpha][beta]]
 [template tag\ _tag]
 `struct` x[tag];
 
-Punctuation Templates
+[heading Punctuation Templates]
 
 [template ~[bar] <hey>[bar]</hey>]
 Now, expanding this:
 [~baz] - Not working as expected... (Used '~' instead of '!')
 
-Blurbs
+[heading Blurbs]
 [blurb :-) [*An eye catching advertisement or note...]
 
     Spirit is an object-oriented recursive-descent parser generator framework
@@ -393,4 +412,5 @@ Blurbs
     ]]
 ]
 [endsect]
+
 [endsect]
