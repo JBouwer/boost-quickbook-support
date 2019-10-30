@@ -97,7 +97,18 @@ class UniUri
     // If path is a directory, make sure last character is a path separator.
     public pathFriendly()
     {
-        return this.uri.fsPath + (this.representsDirectory() ? path.sep : '');
+        if( this.exists() )
+        {
+            if( this.representsDirectory() && !this.uri.fsPath.endsWith(path.sep) )
+            {
+                return this.uri.fsPath + path.sep;
+            }
+            else
+            {
+                return this.uri.fsPath;
+            }
+        }
+        else return this.strPath;
     }
     
     public uriDirectory(): vscode.Uri
@@ -214,7 +225,7 @@ class Settings
                                 let uniUriSetting = new UniUri(setting);
                                 setting = uniUriSetting.pathFriendly();
                                     
-                                if(localResourceRoots)
+                                if(localResourceRoots && uniUriSetting.exists())
                                 {
                                     // Add the directory to the 'localResourceRoots' array.
                                     // Note that this by itself will not allow the VSCode Webview to access local resources...
