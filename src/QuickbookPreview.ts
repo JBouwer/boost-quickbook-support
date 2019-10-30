@@ -181,45 +181,64 @@ class Settings
             }
         }
         
-        function strSetting(section: string, option: string, asPath: boolean = false, localResourceRoots?: vscode.Uri[] ): string
+        function processSetting(v: any, option: string, asPath: boolean = false, localResourceRoots?: vscode.Uri[] ): string
         {
-            let v = config.get(section);
             if(v && !!v)
             {
-                switch(typeof(v))
+                if( v instanceof Array)
                 {
-                    case 'boolean': return ' ' + option;
-                    case 'number': return ' ' + option + ' ' + v.toString();
-                    case 'string': 
+                    let returnValue = '';
+                    for(var element of v)
                     {
-                        let setting: string = v.toString();
-                        if(asPath)
-                        {
-                            // Check for existence of path - if not, try by prepending the workspace folders..
-                            // ... use the first one that result in a successful 'exist', otherwise use as specified.
-                            setting = strPathFittedToWorkspace(setting);
-                            
-                            // Attempt to parse the setting as an URI - if fail interpret it as a filesystem path.
-                            let uniUriSetting = new UniUri(setting);
-                            setting = uniUriSetting.pathFriendly();
-                                
-                            if(localResourceRoots)
-                            {
-                                // Add the directory to the 'localResourceRoots' array.
-                                // Note that this by itself will not allow the VSCode Webview to access local resources...
-                                // ... they need to be accessed with the 'vscode-resource:' scheme.
-                                // See: https://code.visualstudio.com/api/extension-guides/webview#loading-local-content
-                                localResourceRoots.push(uniUriSetting.uriDirectory());
-                            }
-                        }
-                        
-                        return ' ' + option + ' "' + setting + '"';
+                        returnValue += processSetting(element, option, asPath, localResourceRoots);
                     }
                     
-                    default: return '';
+                    return returnValue;
+                }
+                else
+                {
+                    switch(typeof(v))
+                    {
+                        case 'boolean': return ' ' + option;
+                        case 'number': return ' ' + option + ' ' + v.toString();
+                        case 'string': 
+                        {
+                            let setting: string = v.toString();
+                            if(asPath)
+                            {
+                                // Check for existence of path - if not, try by prepending the workspace folders..
+                                // ... use the first one that result in a successful 'exist', otherwise use as specified.
+                                setting = strPathFittedToWorkspace(setting);
+                                
+                                // Attempt to parse the setting as an URI - if fail interpret it as a filesystem path.
+                                let uniUriSetting = new UniUri(setting);
+                                setting = uniUriSetting.pathFriendly();
+                                    
+                                if(localResourceRoots)
+                                {
+                                    // Add the directory to the 'localResourceRoots' array.
+                                    // Note that this by itself will not allow the VSCode Webview to access local resources...
+                                    // ... they need to be accessed with the 'vscode-resource:' scheme.
+                                    // See: https://code.visualstudio.com/api/extension-guides/webview#loading-local-content
+                                    localResourceRoots.push(uniUriSetting.uriDirectory());
+                                }
+                            }
+                            
+                            return ' ' + option + ' "' + setting + '"';
+                        }
+                        
+                        default: return '';
+                    }
                 }
             }
             else return '';
+        }
+        
+        function strSetting(section: string, option: string, asPath: boolean = false, localResourceRoots?: vscode.Uri[] ): string
+        {
+            let v = config.get(section);
+            
+            return processSetting(v, option, asPath, localResourceRoots);
         }
         
         // Include path:
