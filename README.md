@@ -107,6 +107,10 @@ Some answers to potential problems can be found [here](FAQ.md).
 
 ## Release Notes
 
+## 0.0.5
+- All directory paths specified in the settings are now appended with a platform specific path separator, when passed to `quickbook` executable for preview generation. (Fixed issue #5)
+- Added additional `array`-settings to allow for multiple `--include-path` (`-I`) & `--define` (`-D`) options passed to `quickbook` executable for preview generation. (Fixed issue #4)
+
 ### 0.0.4
 - Modified settings functionality to reload with every _preview_ operation (no more _Reload Window_ necessary).
 - Added _Content Security Policy_, (Issue #3), and associated `quickbook.preview.security.contentSecurityPolicy` setting.

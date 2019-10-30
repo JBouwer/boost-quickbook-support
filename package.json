@@ -35,7 +35,13 @@
                 },
                 "quickbook.preview.defineMacro": {
                     "type": "string",
+                    "deprecationMessage": "This property is deprecated, and may be removed in a future version. Please add existing values to the \"`Define Macros`\" array below.",
                     "markdownDescription": "Predefined macro.  \nPassed with `--define` option to executable."
+                },
+                "quickbook.preview.defineMacros": {
+                    "type": "array",
+                    "default": [],
+                    "markdownDescription": "Predefined macros.  \nPassed with `--define` options to executable."
                 },
                 "quickbook.preview.graphicsPath": {
                     "type": "string",
@@ -47,12 +53,24 @@
                 },
                 "quickbook.preview.include.path": {
                     "type": "string",
+                    "deprecationMessage": "This property is deprecated, and may be removed in a future version. Please add existing values to the \"`Include Paths`\" array below.",
                     "markdownDescription": "Include path. This will override the `quickbook.preview.include.workspacePath` setting.  \nPassed with `--include-path` option to executable."
+                },
+                "quickbook.preview.include.paths": {
+                    "type": "array",
+                    "default": [],
+                    "markdownDescription": "Include paths.  \nThese will be passed with `--include-path` options to executable."
                 },
                 "quickbook.preview.include.workspacePath": {
                     "type": "boolean",
                     "default": true,
+                    "deprecationMessage": "This property is deprecated, and may be removed in a future version. Please prefer the \"`Include Workspace Paths`\" setting below.",
                     "markdownDescription": "Use the first _workspace path_ as the include path. This will be overridden when the `quickbook.preview.include.path` setting is also specified.  \n(Passed with `--include-path` option to executable.)"
+                },
+                "quickbook.preview.include.workspacePaths": {
+                    "type": "boolean",
+                    "default": true,
+                    "markdownDescription": "Add all the _workspace paths_ as include paths. This will be passed in addition to the \"`Include Paths`\" setting above.  \n(Passed with `--include-path` option to executable.)"
                 },
                 "quickbook.preview.indent": {
                     "type": [

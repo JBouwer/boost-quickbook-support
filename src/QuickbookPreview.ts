@@ -241,23 +241,51 @@ class Settings
             return processSetting(v, option, asPath, localResourceRoots);
         }
         
+        // Define Macro(s)
+        // ===============
+        // 1 - First do the old deprecated (Version <= 0.0.4) functionality:
+        // -----------------------------------------------------------------
+        let strMacroDefine = strSetting('preview.defineMacro', '--define', false);
+        
+        // 2 - Next do the current (new) functionality:
+        // --------------------------------------------
+        let strMacroDefines = strSetting('preview.defineMacros', '--define', false);
+        
         // Include path:
+        // =============
+        // 1 - First do the current (new) functionality:
+        // --------------------------------------------
+        let arrayPathIncludes = config.get('preview.include.paths', [""]);
+        if( getSetting<boolean>('preview.include.workspacePaths', false)
+            && vscode.workspace.workspaceFolders )
+        {
+            for(var element of vscode.workspace.workspaceFolders)
+            {
+                arrayPathIncludes.push(element.uri.fsPath);
+            }
+        }
+        
+        // 2 - Next, do the old deprecated (Version <= 0.0.4) functionality:
+        //     (If not already covered)
+        // -----------------------------------------------------------------
         // First, check 'preview.include.path'.
-        // If empty, then check 'preview.include.workspacePath'
+        // If empty, then check 'preview.include.workspacePath' - only if not already added above.
         let strPathInclude: string = getSetting<string>('preview.include.path', '');
         if( (strPathInclude.length == 0)
            && getSetting<boolean>('preview.include.workspacePath', false)
+           && !getSetting<boolean>('preview.include.workspacePaths', false) // Don't add if already added above!
            && vscode.workspace.workspaceFolders
           )
         {
-            strPathInclude = vscode.workspace.workspaceFolders[0].uri.fsPath;
+            arrayPathIncludes.push(vscode.workspace.workspaceFolders[0].uri.fsPath);
         }
-        if(this.trustSpecifiedDirectories && strPathInclude.length >= 0)
+        else if( strPathInclude.length != 0 )
         {
-            this.localResourceRoots.push(new UniUri(strPathInclude).uri);
+            arrayPathIncludes.push(strPathInclude);
         }
         
-        strPathInclude = ' --include-path "' + strPathInclude + '"';
+        let strPathIncludes = processSetting(arrayPathIncludes, '--include-path', true,
+                                             this.trustSpecifiedDirectories ? this.localResourceRoots : undefined);
         
         // Read settings & build a command line from them
         // Also collect 'localResourceRoots' directories when specified.
@@ -265,8 +293,9 @@ class Settings
                          + strSetting('preview.noSelfLinkedHeaders', '--no-self-linked-headers')
                          + strSetting('preview.indent', '--indent')
                          + strSetting('preview.lineWidth', '--linewidth')
-                         + strSetting('preview.defineMacro', '--define')
-                         + strPathInclude
+                         + strMacroDefine
+                         + strMacroDefines
+                         + strPathIncludes
                          + strSetting('preview.imageLocation', '--image-location', true,
                                       this.trustSpecifiedDirectories ? this.localResourceRoots : undefined)
                          + strSetting('preview.boostRootPath', '--boost-root-path', true,
