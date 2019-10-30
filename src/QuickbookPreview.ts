@@ -127,10 +127,10 @@ class Settings
     readonly processImagePathRelative: boolean;
     readonly processImagePathScheme: boolean;
     
-    readonly trustSourceFileDirectory: boolean;
-    readonly trustWorkspaceDirectories: boolean;
-    readonly trustSpecifiedDirectories: boolean;
     readonly trustAdditionalDirectories: string[];
+    readonly trustSourceFileDirectory: boolean;
+    readonly trustSpecifiedDirectories: boolean;
+    readonly trustWorkspaceDirectories: boolean;
     
     constructor(pathSourceFile: string)
     {
@@ -154,10 +154,10 @@ class Settings
         this.processImagePathRelative = getSetting<boolean>('preview.security.processImagePathRelative', false);
         this.processImagePathScheme = getSetting<boolean>('preview.security.processImagePathScheme', false);
         
-        this.trustSourceFileDirectory = getSetting<boolean>('preview.security.trustSourceFileDirectory', false);
-        this.trustWorkspaceDirectories = getSetting<boolean>('preview.security.trustWorkspaceDirectories', false);
-        this.trustSpecifiedDirectories = getSetting<boolean>('preview.security.trustSpecifiedDirectories', false);
         this.trustAdditionalDirectories = getSetting<string[]>('preview.security.trustAdditionalDirectories', []);
+        this.trustSourceFileDirectory = getSetting<boolean>('preview.security.trustSourceFileDirectory', false);
+        this.trustSpecifiedDirectories = getSetting<boolean>('preview.security.trustSpecifiedDirectories', false);
+        this.trustWorkspaceDirectories = getSetting<boolean>('preview.security.trustWorkspaceDirectories', false);
         
         // Check for existence of path - if not, try by prepending the workspace folders..
         // ... use the first one that result in a successful 'exist', otherwise use as specified.
@@ -316,13 +316,8 @@ class Settings
                          + strSetting('preview.graphicsPath', '--graphics-path', true,
                                       this.trustSpecifiedDirectories ? this.localResourceRoots : undefined)
                          ;
-        // Add directory of source file to 'localResourceRoots'.
-        if(this.trustSourceFileDirectory)
-        {
-            let uriSourceFile = vscode.Uri.parse('vscode-resource:' + path.dirname(pathSourceFile), false);
-            this.localResourceRoots.push( uriSourceFile );
-        }
         
+        // Trust "Additional Directories), if allowed.
         if(this.trustAdditionalDirectories)
         {
             for(let dir of this.trustAdditionalDirectories)
@@ -330,6 +325,13 @@ class Settings
                 let uniUriDir = new UniUri(strPathFittedToWorkspace(dir));
                 this.localResourceRoots.push( uniUriDir.uri );
             }
+        }
+        
+        // Trust directory of source file, if allowed.
+        if(this.trustSourceFileDirectory)
+        {
+            let uriSourceFile = vscode.Uri.parse('vscode-resource:' + path.dirname(pathSourceFile), false);
+            this.localResourceRoots.push( uriSourceFile );
         }
         
     }

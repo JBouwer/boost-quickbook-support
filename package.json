@@ -118,11 +118,6 @@
                     "default": [],
                     "markdownDescription": "Trust the preview to access these directories with the `vscode-resource:` scheme."
                 },
-                "quickbook.preview.security.trustWorkspaceDirectories": {
-                    "type": "boolean",
-                    "default": true,
-                    "markdownDescription": "Trust the preview to access workspace directories with the `vscode-resource:` scheme."
-                },
                 "quickbook.preview.security.trustSourceFileDirectory": {
                     "type": "boolean",
                     "default": true,
@@ -132,6 +127,11 @@
                     "type": "boolean",
                     "default": true,
                     "markdownDescription": "Trust the preview to access the directories specified above with `--boost-root-path`, `--css-path`, `--graphics-path`, `--image-location` & `--include-path` with the `vscode-resource:` scheme."
+                },
+                "quickbook.preview.security.trustWorkspaceDirectories": {
+                    "type": "boolean",
+                    "default": true,
+                    "markdownDescription": "Trust the preview to access workspace directories with the `vscode-resource:` scheme.",
                 },
                 "quickbook.preview.strict": {
                     "type": "boolean",
