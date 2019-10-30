@@ -196,7 +196,7 @@ class Settings
         {
             if(v && !!v)
             {
-                if( v instanceof Array)
+                if( v instanceof Array || v instanceof Set )
                 {
                     let returnValue = '';
                     for(var element of v)
@@ -266,13 +266,13 @@ class Settings
         // =============
         // 1 - First do the current (new) functionality:
         // --------------------------------------------
-        let arrayPathIncludes = config.get('preview.include.paths', [""]);
+        let setPathIncludes = new Set( config.get('preview.include.paths', [""]) );
         if( getSetting<boolean>('preview.include.workspacePaths', false)
             && vscode.workspace.workspaceFolders )
         {
             for(var element of vscode.workspace.workspaceFolders)
             {
-                arrayPathIncludes.push(element.uri.fsPath);
+                setPathIncludes.add(element.uri.fsPath);
             }
         }
         
@@ -288,14 +288,14 @@ class Settings
            && vscode.workspace.workspaceFolders
           )
         {
-            arrayPathIncludes.push(vscode.workspace.workspaceFolders[0].uri.fsPath);
+            setPathIncludes.add(vscode.workspace.workspaceFolders[0].uri.fsPath);
         }
         else if( strPathInclude.length != 0 )
         {
-            arrayPathIncludes.push(strPathInclude);
+            setPathIncludes.add(strPathInclude);
         }
         
-        let strPathIncludes = processSetting(arrayPathIncludes, '--include-path', true,
+        let strPathIncludes = processSetting(setPathIncludes, '--include-path', true,
                                              this.trustSpecifiedDirectories ? this.localResourceRoots : undefined);
         
         // Read settings & build a command line from them
