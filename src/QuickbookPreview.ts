@@ -67,6 +67,39 @@ class UniUri
         else return '';
     }
     
+    // Check if path is a directory, or a symlink to a directory.
+    public representsDirectory(): boolean
+    {
+        if(this.exists())
+        {
+            let stat = fs.lstatSync(this.uri.fsPath);
+            if(stat.isDirectory())
+            {
+                return true;
+            }
+            else if(stat.isSymbolicLink())
+            {
+                let realPath = fs.realpathSync(this.uri.fsPath);
+                stat = fs.lstatSync(realPath);
+                return stat.isDirectory();
+            }
+            else
+            {
+                return false;
+            }
+        }
+        else
+        {
+            return false;
+        }
+    }
+    
+    // If path is a directory, make sure last character is a path separator.
+    public pathFriendly()
+    {
+        return this.uri.fsPath + (this.representsDirectory() ? path.sep : '');
+    }
+    
     public uriDirectory(): vscode.Uri
     {
         return this.uri.with({ path:this.directory() });
@@ -148,7 +181,7 @@ class Settings
             }
         }
         
-        function strSetting(section: string, option: string, localResourceRoots?: vscode.Uri[] ): string
+        function strSetting(section: string, option: string, asPath: boolean = false, localResourceRoots?: vscode.Uri[] ): string
         {
             let v = config.get(section);
             if(v && !!v)
@@ -160,7 +193,7 @@ class Settings
                     case 'string': 
                     {
                         let setting: string = v.toString();
-                        if(localResourceRoots)
+                        if(asPath)
                         {
                             // Check for existence of path - if not, try by prepending the workspace folders..
                             // ... use the first one that result in a successful 'exist', otherwise use as specified.
@@ -168,12 +201,16 @@ class Settings
                             
                             // Attempt to parse the setting as an URI - if fail interpret it as a filesystem path.
                             let uniUriSetting = new UniUri(setting);
-                            
-                            // Add the directory to the 'localResourceRoots' array.
-                            // Note that this by itself will not allow the VSCode Webview to access local resources...
-                            // ... they need to be accessed with the 'vscode-resource:' scheme.
-                            // See: https://code.visualstudio.com/api/extension-guides/webview#loading-local-content
-                            localResourceRoots.push(uniUriSetting.uriDirectory());
+                            setting = uniUriSetting.pathFriendly();
+                                
+                            if(localResourceRoots)
+                            {
+                                // Add the directory to the 'localResourceRoots' array.
+                                // Note that this by itself will not allow the VSCode Webview to access local resources...
+                                // ... they need to be accessed with the 'vscode-resource:' scheme.
+                                // See: https://code.visualstudio.com/api/extension-guides/webview#loading-local-content
+                                localResourceRoots.push(uniUriSetting.uriDirectory());
+                            }
                         }
                         
                         return ' ' + option + ' "' + setting + '"';
@@ -211,13 +248,13 @@ class Settings
                          + strSetting('preview.lineWidth', '--linewidth')
                          + strSetting('preview.defineMacro', '--define')
                          + strPathInclude
-                         + strSetting('preview.imageLocation', '--image-location',
+                         + strSetting('preview.imageLocation', '--image-location', true,
                                       this.trustSpecifiedDirectories ? this.localResourceRoots : undefined)
-                         + strSetting('preview.boostRootPath', '--boost-root-path',
+                         + strSetting('preview.boostRootPath', '--boost-root-path', true,
                                       this.trustSpecifiedDirectories ? this.localResourceRoots : undefined)
-                         + strSetting('preview.CSSPath', '--css-path',
+                         + strSetting('preview.CSSPath', '--css-path', true,
                                       this.trustSpecifiedDirectories ? this.localResourceRoots : undefined)
-                         + strSetting('preview.graphicsPath', '--graphics-path',
+                         + strSetting('preview.graphicsPath', '--graphics-path', true,
                                       this.trustSpecifiedDirectories ? this.localResourceRoots : undefined)
                          ;
         // Add directory of source file to 'localResourceRoots'.

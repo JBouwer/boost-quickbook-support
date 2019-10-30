@@ -5,6 +5,9 @@
     Check http://keepachangelog.com for recommendations on how to structure this file.
 )
 
+## 0.0.5
+- All directory paths specified in the settings are now appended with a platform specific path separator, when passed to `quickbook` executable for preview generation.  
+  (Fixed issue #5)
 ## 0.0.4
 - Modified settings functionality to reload with every _preview_ operation (no more _Reload Window_ necessary).
 - Added _Content Security Policy_, (Issue #3), and associated `quickbook.preview.security.contentSecurityPolicy` setting.
