@@ -187,7 +187,7 @@ class Settings
             return pathIn;
         }
         
-        function processSetting(v: any, option: string, setPaths: Set<string> | undefined = undefined): string
+        function processSetting(v: any, option: string, setPaths: UniqueArray<UniUri> | undefined = undefined): string
         {
             if(v && !!v)
             {
@@ -212,76 +212,52 @@ class Settings
                             let setting: string = v.toString();
                             if(setPaths)
                             {
-                                // Check for existence of path - if not, try by prepending the workspace folders..
+                                // Check for existence of path - if not, try by pre-pending the workspace folders..
                                 // ... use the first one that result in a successful 'exist', otherwise use as specified.
                                 setting = strPathFittedToWorkspace(setting);
                                 
                                 // Attempt to parse the setting as an URI - if fail interpret it as a filesystem path.
                                 let uniUriSetting = new UniUri(setting);
-                                setting = uniUriSetting.pathFriendly();
                                 
-                                // Add to set
-                                setPaths.add(setting);
+                                return processSetting(uniUriSetting, option, setPaths);
                             }
-                            
-                            return ' ' + option + ' "' + setting + '"';
+                            else
+                            {
+                                return ' ' + option + ' "' + setting + '"';
+                            }
                         }
                         
-                        default: return '';
+                        case 'object': 
+                        {
+                            if( v instanceof UniUri)
+                            {
+                                if(setPaths)
+                                {
+                                    setPaths.add(v);
+                                }
+                                
+                                return ' ' + option + ' "' + v.pathFriendly() + '"';
+                            }
+                            else
+                            {
+                                console.log( "Unknown object of type: '" + typeof(v) + "'" );
+                            }
+                        }
+                        
+                        default:
+                            console.log( "Unknown type: '" + typeof(v) + "'" );
+                            return '';
                     }
                 }
             }
             else return '';
         }
         
-        function strSetting(section: string, option: string, setPaths: Set<string> | undefined = undefined): string
+        function strSetting(section: string, option: string, setPaths: UniqueArray<UniUri> | undefined = undefined): string
         {
             let v = config.get(section);
             
             return processSetting(v, option, setPaths);
-        }
-        
-        function processTrustDirectory(v: any, localResourceRoots: vscode.Uri[] )
-        {
-            if(v && !!v)
-            {
-                if( v instanceof Array || v instanceof Set )
-                {
-                    let returnValue = '';
-                    for(var element of v)
-                    {
-                        returnValue += processTrustDirectory(element, localResourceRoots);
-                    }
-                }
-                else
-                {
-                    if( typeof(v) == 'string' ) 
-                    {
-                        let setting: string = v.toString();
-                        
-                        // Check for existence of path - if not, try by prepending the workspace folders..
-                        // ... use the first one that result in a successful 'exist', otherwise use as specified.
-                        setting = strPathFittedToWorkspace(setting);
-                        
-                        // Attempt to parse the setting as an URI - if fail interpret it as a filesystem path.
-                        let uniUriSetting = new UniUri(setting);
-                        
-                        if(uniUriSetting.exists())
-                        {
-                            // Add the directory to the 'localResourceRoots' array.
-                            // Note that this by itself will not allow the VSCode Webview to access local resources...
-                            // ... they need to be accessed with the 'vscode-resource:' scheme.
-                            // See: https://code.visualstudio.com/api/extension-guides/webview#loading-local-content
-                            localResourceRoots.push(uniUriSetting.uriDirectory());
-                        }
-                    }
-                    else
-                    {
-                        console.log( "Invalid path:'" + v.toString() + "' of type: '" + typeof(v) + "'." );
-                    }
-                }
-            }
-            else return '';
         }
         
         // Define Macro(s)
@@ -298,17 +274,16 @@ class Settings
         // =============
         // 1 - First do the current (new) functionality:
         // --------------------------------------------
-        let setPathIncludesExplicit = new Set<string>();
+        let setPathIncludesExplicit = new UniqueArray<UniUri>();
         let strPathIncludesExplicit = strSetting('preview.include.paths', '--include-path', setPathIncludesExplicit);
         
-        let setPathIncludesWorkspace = new Set<string>();
+        let setPathIncludesWorkspace = new UniqueArray<UniUri>();
         if( getSetting<boolean>('preview.include.workspacePaths', false)
             && vscode.workspace.workspaceFolders )
         {
             for(var element of vscode.workspace.workspaceFolders)
             {
-                let p = new UniUri(element.uri.fsPath);
-                setPathIncludesWorkspace.add(p.pathFriendly());
+                setPathIncludesWorkspace.add( new UniUri(element.uri.fsPath) );
             }
         }
         
@@ -328,17 +303,16 @@ class Settings
            && vscode.workspace.workspaceFolders
           )
         {
-            let p = new UniUri(vscode.workspace.workspaceFolders[0].uri.fsPath);
-            setPathIncludesWorkspace.add(p.pathFriendly());
+            setPathIncludesWorkspace.add( new UniUri(vscode.workspace.workspaceFolders[0].uri.fsPath) );
         }
         
         // Convert the workspace set into '--include-path' option string...
         // Note that the contents is already canonized, thus no 3rd parameter is passed.
         let strPathIncludesWorkspace = processSetting(setPathIncludesWorkspace, '--include-path');
         
-        // Read settings & build a command line from them
+        // Read settings & build a command line from them.
         // Also collect 'localResourceRoots' directories when specified.
-        let setPathSpecifiedDirectories = new Set<string>();
+        let setPathSpecifiedDirectories = new UniqueArray<UniUri>();
         this.strOptions  = strSetting('preview.strict', '--strict')
                          + strSetting('preview.noSelfLinkedHeaders', '--no-self-linked-headers')
                          + strSetting('preview.indent', '--indent')
@@ -360,28 +334,37 @@ class Settings
             for(let dir of this.trustAdditionalDirectories)
             {
                 let uniUriDir = new UniUri(strPathFittedToWorkspace(dir));
-                this.localResourceRoots.push( uniUriDir.uri );
+                this.localResourceRoots.add(uniUriDir.uri);
             }
         }
         
         // Trust directory of source file, if allowed.
         if(this.trustSourceFileDirectory)
         {
-            let uriSourceFile = vscode.Uri.parse('vscode-resource:' + path.dirname(pathSourceFile), false);
-            this.localResourceRoots.push( uriSourceFile );
+            let uriSourceFileDir = new UniUri( path.dirname(pathSourceFile) );
+            this.localResourceRoots.add(uriSourceFileDir.uri);
         }
         
         // Trust "Specified Directories", if allowed.
         if(this.trustSpecifiedDirectories)
         {
-            processTrustDirectory(setPathIncludesExplicit, this.localResourceRoots);
-            processTrustDirectory(setPathSpecifiedDirectories, this.localResourceRoots);
+            for(let u of setPathIncludesExplicit)
+            {
+                this.localResourceRoots.add(u.uri);
+            }
+            for(let u of setPathSpecifiedDirectories)
+            {
+                this.localResourceRoots.add(u.uri);
+            }
         }
         
         // Trust Workspace Directories, if allowed.
         if(this.trustWorkspaceDirectories)
         {
-            processTrustDirectory(setPathIncludesWorkspace, this.localResourceRoots);
+            for(let u of setPathIncludesWorkspace)
+            {
+                this.localResourceRoots.add(u.uri);
+            }
         }
     }
 };
