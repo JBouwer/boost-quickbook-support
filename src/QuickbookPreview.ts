@@ -192,7 +192,7 @@ class Settings
             }
         }
         
-        function processSetting(v: any, option: string, asPath: boolean = false, localResourceRoots?: vscode.Uri[] ): string
+        function processSetting(v: any, option: string, asPath: boolean = false): string
         {
             if(v && !!v)
             {
@@ -201,7 +201,7 @@ class Settings
                     let returnValue = '';
                     for(var element of v)
                     {
-                        returnValue += processSetting(element, option, asPath, localResourceRoots);
+                        returnValue += processSetting(element, option, asPath);
                     }
                     
                     return returnValue;
@@ -224,15 +224,6 @@ class Settings
                                 // Attempt to parse the setting as an URI - if fail interpret it as a filesystem path.
                                 let uniUriSetting = new UniUri(setting);
                                 setting = uniUriSetting.pathFriendly();
-                                    
-                                if(localResourceRoots && uniUriSetting.exists())
-                                {
-                                    // Add the directory to the 'localResourceRoots' array.
-                                    // Note that this by itself will not allow the VSCode Webview to access local resources...
-                                    // ... they need to be accessed with the 'vscode-resource:' scheme.
-                                    // See: https://code.visualstudio.com/api/extension-guides/webview#loading-local-content
-                                    localResourceRoots.push(uniUriSetting.uriDirectory());
-                                }
                             }
                             
                             return ' ' + option + ' "' + setting + '"';
@@ -245,11 +236,54 @@ class Settings
             else return '';
         }
         
-        function strSetting(section: string, option: string, asPath: boolean = false, localResourceRoots?: vscode.Uri[] ): string
+        function strSetting(section: string, option: string, asPath: boolean = false): string
         {
             let v = config.get(section);
             
-            return processSetting(v, option, asPath, localResourceRoots);
+            return processSetting(v, option, asPath);
+        }
+        
+        function processTrustDirectory(v: any, localResourceRoots: vscode.Uri[] )
+        {
+            if(v && !!v)
+            {
+                if( v instanceof Array || v instanceof Set )
+                {
+                    let returnValue = '';
+                    for(var element of v)
+                    {
+                        returnValue += processTrustDirectory(element, localResourceRoots);
+                    }
+                }
+                else
+                {
+                    if( typeof(v) == 'string' ) 
+                    {
+                        let setting: string = v.toString();
+                        
+                        // Check for existence of path - if not, try by prepending the workspace folders..
+                        // ... use the first one that result in a successful 'exist', otherwise use as specified.
+                        setting = strPathFittedToWorkspace(setting);
+                        
+                        // Attempt to parse the setting as an URI - if fail interpret it as a filesystem path.
+                        let uniUriSetting = new UniUri(setting);
+                        
+                        if(uniUriSetting.exists())
+                        {
+                            // Add the directory to the 'localResourceRoots' array.
+                            // Note that this by itself will not allow the VSCode Webview to access local resources...
+                            // ... they need to be accessed with the 'vscode-resource:' scheme.
+                            // See: https://code.visualstudio.com/api/extension-guides/webview#loading-local-content
+                            localResourceRoots.push(uniUriSetting.uriDirectory());
+                        }
+                    }
+                    else
+                    {
+                        console.log( "Invalid path:'" + v.toString() + "' of type: '" + typeof(v) + "'." );
+                    }
+                }
+            }
+            else return '';
         }
         
         // Define Macro(s)
@@ -266,13 +300,15 @@ class Settings
         // =============
         // 1 - First do the current (new) functionality:
         // --------------------------------------------
-        let setPathIncludes = new Set( config.get('preview.include.paths', [""]) );
+        let setPathIncludesExplicit = new Set( config.get('preview.include.paths', [""]) );
+        
+        let setPathIncludesWorkspace = new Set();
         if( getSetting<boolean>('preview.include.workspacePaths', false)
             && vscode.workspace.workspaceFolders )
         {
             for(var element of vscode.workspace.workspaceFolders)
             {
-                setPathIncludes.add(element.uri.fsPath);
+                setPathIncludesWorkspace.add(element.uri.fsPath);
             }
         }
         
@@ -282,21 +318,23 @@ class Settings
         // First, check 'preview.include.path'.
         // If empty, then check 'preview.include.workspacePath' - only if not already added above.
         let strPathInclude: string = getSetting<string>('preview.include.path', '');
+        
         if( (strPathInclude.length == 0)
            && getSetting<boolean>('preview.include.workspacePath', false)
            && !getSetting<boolean>('preview.include.workspacePaths', false) // Don't add if already added above!
            && vscode.workspace.workspaceFolders
           )
         {
-            setPathIncludes.add(vscode.workspace.workspaceFolders[0].uri.fsPath);
+            setPathIncludesWorkspace.add(vscode.workspace.workspaceFolders[0].uri.fsPath);
         }
         else if( strPathInclude.length != 0 )
         {
-            setPathIncludes.add(strPathInclude);
+            setPathIncludesExplicit.add(strPathInclude);
         }
         
-        let strPathIncludes = processSetting(setPathIncludes, '--include-path', true,
-                                             this.trustSpecifiedDirectories ? this.localResourceRoots : undefined);
+        let strPathIncludesExplicit = processSetting(setPathIncludesExplicit, '--include-path', true);
+        
+        let strPathIncludesWorkspace = processSetting(setPathIncludesWorkspace, '--include-path', true);
         
         // Read settings & build a command line from them
         // Also collect 'localResourceRoots' directories when specified.
@@ -306,18 +344,15 @@ class Settings
                          + strSetting('preview.lineWidth', '--linewidth')
                          + strMacroDefine
                          + strMacroDefines
-                         + strPathIncludes
-                         + strSetting('preview.imageLocation', '--image-location', true,
-                                      this.trustSpecifiedDirectories ? this.localResourceRoots : undefined)
-                         + strSetting('preview.boostRootPath', '--boost-root-path', true,
-                                      this.trustSpecifiedDirectories ? this.localResourceRoots : undefined)
-                         + strSetting('preview.CSSPath', '--css-path', true,
-                                      this.trustSpecifiedDirectories ? this.localResourceRoots : undefined)
-                         + strSetting('preview.graphicsPath', '--graphics-path', true,
-                                      this.trustSpecifiedDirectories ? this.localResourceRoots : undefined)
+                         + strPathIncludesExplicit
+                         + strPathIncludesWorkspace
+                         + strSetting('preview.imageLocation', '--image-location', true)
+                         + strSetting('preview.boostRootPath', '--boost-root-path', true)
+                         + strSetting('preview.CSSPath', '--css-path', true)
+                         + strSetting('preview.graphicsPath', '--graphics-path', true)
                          ;
         
-        // Trust "Additional Directories), if allowed.
+        // Trust "Additional Directories", if allowed.
         if(this.trustAdditionalDirectories)
         {
             for(let dir of this.trustAdditionalDirectories)
@@ -334,6 +369,17 @@ class Settings
             this.localResourceRoots.push( uriSourceFile );
         }
         
+        // Trust "Specified Directories", if allowed.
+        if(this.trustSpecifiedDirectories)
+        {
+            processTrustDirectory(setPathIncludesExplicit, this.localResourceRoots);
+        }
+        
+        // Trust Workspace Directories, if allowed.
+        if(this.trustWorkspaceDirectories)
+        {
+            processTrustDirectory(setPathIncludesWorkspace, this.localResourceRoots);
+        }
     }
 };
 

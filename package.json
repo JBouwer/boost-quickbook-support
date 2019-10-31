@@ -116,22 +116,22 @@
                 "quickbook.preview.security.trustAdditionalDirectories": {
                     "type": "array",
                     "default": [],
-                    "markdownDescription": "Trust the preview to access these directories with the `vscode-resource:` scheme."
+                    "markdownDescription": "Allow the preview to trust these directories for accessing local resources."
                 },
                 "quickbook.preview.security.trustSourceFileDirectory": {
                     "type": "boolean",
                     "default": true,
-                    "markdownDescription": "Trust the preview to access the directory of the source file (i.e. the file being previewed)."
+                    "markdownDescription": "Allow the preview to trust the directory of the source file (i.e. the file being previewed) for accessing local resources."
                 },
                 "quickbook.preview.security.trustSpecifiedDirectories": {
                     "type": "boolean",
                     "default": true,
-                    "markdownDescription": "Trust the preview to access the directories specified above with `--boost-root-path`, `--css-path`, `--graphics-path`, `--image-location` & `--include-path` with the `vscode-resource:` scheme."
+                    "markdownDescription": "Allow the preview to trust the following directories specified above for accessing local resources:  \n Boost Root Path(`--boost-root-path`), CSS Path(`--css-path`), Graphics Path(`--graphics-path`), Image Location(`--image-location`) & Include Path(`--include-path`)."
                 },
                 "quickbook.preview.security.trustWorkspaceDirectories": {
                     "type": "boolean",
                     "default": true,
-                    "markdownDescription": "Trust the preview to access workspace directories with the `vscode-resource:` scheme.",
+                    "markdownDescription": "Trust the preview to access workspace directories with the `vscode-resource:` scheme."
                 },
                 "quickbook.preview.strict": {
                     "type": "boolean",
