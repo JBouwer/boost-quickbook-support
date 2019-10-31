@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as cp from 'child_process';
+import { UniqueArray } from './UniqueArray';
 
 class UniUri
 {
@@ -124,11 +125,12 @@ class UniUri
 
 class Settings
 {
+    readonly localResourceRoots: UniqueArray<vscode.Uri>;
+    
     readonly strPathSourceFile: string;
     readonly strPathToExecutable: string;
     readonly strOptions: string;
     readonly strContentSecurityPolicy: string;
-    readonly localResourceRoots: vscode.Uri[] = [];
     readonly processImagePathRelative: boolean;
     readonly processImagePathScheme: boolean;
     
@@ -139,6 +141,7 @@ class Settings
     
     constructor(pathSourceFile: string)
     {
+        this.localResourceRoots = new UniqueArray<vscode.Uri>();
         this.strPathSourceFile = pathSourceFile;
         
         let config = vscode.workspace.getConfiguration('quickbook');
@@ -182,19 +185,6 @@ class Settings
             }
             
             return pathIn;
-        }
-        
-        // Function to determine directory if path is a file.
-        function getDir(strPath: string)
-        {
-            if(fs.existsSync(strPath) && fs.lstatSync(strPath).isFile())
-            {
-                return path.dirname(strPath);
-            }
-            else
-            {
-                return strPath;
-            }
         }
         
         function processSetting(v: any, option: string, setPaths: Set<string> | undefined = undefined): string
