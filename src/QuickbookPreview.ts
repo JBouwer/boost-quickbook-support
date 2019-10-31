@@ -341,8 +341,8 @@ class Settings
         // Trust directory of source file, if allowed.
         if(this.trustSourceFileDirectory)
         {
-            let uriSourceFileDir = new UniUri( path.dirname(pathSourceFile) );
-            this.localResourceRoots.add(uriSourceFileDir.uri);
+            let uriSourceFile = new UniUri(pathSourceFile);
+            this.localResourceRoots.add(uriSourceFile.uriDirectory());
         }
         
         // Trust "Specified Directories", if allowed.
@@ -363,7 +363,7 @@ class Settings
         {
             for(let u of setPathIncludesWorkspace)
             {
-                this.localResourceRoots.add(u.uri);
+                this.localResourceRoots.add(u.uriDirectory());
             }
         }
     }
