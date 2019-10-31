@@ -453,7 +453,7 @@ export class QuickbookPreview
         channel.show(true);
     }
     
-    protected processPreview(contents: string, settings: Settings)
+    protected processPreview(contents: string, settings: Settings, webView: vscode.Webview)
     {
         // Inject Security Policy
         let strSecurityPolicy = `<meta http-equiv="Content-Security-Policy" content="${settings.strContentSecurityPolicy}">`;
@@ -496,7 +496,7 @@ export class QuickbookPreview
         return contents;
     }
     
-    protected setPreview(title: string, contents: string, urisResourceRoots: vscode.Uri[])
+    protected setPreview(title: string, strContents: string, mustProcess: boolean, settings: Settings)
     {
         const self = this;
         
@@ -509,7 +509,7 @@ export class QuickbookPreview
                     self.column_ ? self.column_
                                  : vscode.ViewColumn.One,   // Editor column to show the new webview panel in.
                     {
-                        localResourceRoots: urisResourceRoots,
+                        localResourceRoots: settings.localResourceRoots,
                         enableFindWidget: true,
                         enableScripts: true
                     }
@@ -530,9 +530,12 @@ export class QuickbookPreview
                 });
         }
         
+        let strProcessedContents = mustProcess ? self.processPreview( strContents, settings, self.panel_.webview )
+                                               : strContents;
+        
         self.panel_.title = title;
         self.panel_.iconPath = self.iconPath;
-        self.panel_.webview.html = contents;
+        self.panel_.webview.html = strProcessedContents;
         self.panel_.reveal(self.column_);
         self.registerActive(true);
     }
@@ -589,11 +592,10 @@ export class QuickbookPreview
             self.setOutputChannel(...output);
             return readFile( self.strPathPreview_, {} );
         }).then((strContents) => {
-            let strProcessedContents = self.processPreview( strContents, settings );
-            self.setPreview( title, strProcessedContents , settings.localResourceRoots);
+            self.setPreview( title, strContents, true, settings);
         }).catch((messages: string[]) => {
             self.setOutputChannel(...messages);
-            self.setPreview( title, self.getFailurePage(...messages), settings.localResourceRoots );
+            self.setPreview( title, self.getFailurePage(...messages), false, settings );
         });
     }
     
