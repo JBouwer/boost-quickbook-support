@@ -192,7 +192,7 @@ class Settings
             }
         }
         
-        function processSetting(v: any, option: string, asPath: boolean = false): string
+        function processSetting(v: any, option: string, setPaths: Set<string> | undefined = undefined): string
         {
             if(v && !!v)
             {
@@ -201,7 +201,7 @@ class Settings
                     let returnValue = '';
                     for(var element of v)
                     {
-                        returnValue += processSetting(element, option, asPath);
+                        returnValue += processSetting(element, option, setPaths);
                     }
                     
                     return returnValue;
@@ -215,7 +215,7 @@ class Settings
                         case 'string': 
                         {
                             let setting: string = v.toString();
-                            if(asPath)
+                            if(setPaths)
                             {
                                 // Check for existence of path - if not, try by prepending the workspace folders..
                                 // ... use the first one that result in a successful 'exist', otherwise use as specified.
@@ -224,6 +224,9 @@ class Settings
                                 // Attempt to parse the setting as an URI - if fail interpret it as a filesystem path.
                                 let uniUriSetting = new UniUri(setting);
                                 setting = uniUriSetting.pathFriendly();
+                                
+                                // Add to set
+                                setPaths.add(setting);
                             }
                             
                             return ' ' + option + ' "' + setting + '"';
@@ -236,11 +239,11 @@ class Settings
             else return '';
         }
         
-        function strSetting(section: string, option: string, asPath: boolean = false): string
+        function strSetting(section: string, option: string, setPaths: Set<string> | undefined = undefined): string
         {
             let v = config.get(section);
             
-            return processSetting(v, option, asPath);
+            return processSetting(v, option, setPaths);
         }
         
         function processTrustDirectory(v: any, localResourceRoots: vscode.Uri[] )
@@ -290,25 +293,27 @@ class Settings
         // ===============
         // 1 - First do the old deprecated (Version <= 0.0.4) functionality:
         // -----------------------------------------------------------------
-        let strMacroDefine = strSetting('preview.defineMacro', '--define', false);
+        let strMacroDefine = strSetting('preview.defineMacro', '--define');
         
         // 2 - Next do the current (new) functionality:
         // --------------------------------------------
-        let strMacroDefines = strSetting('preview.defineMacros', '--define', false);
+        let strMacroDefines = strSetting('preview.defineMacros', '--define');
         
         // Include path:
         // =============
         // 1 - First do the current (new) functionality:
         // --------------------------------------------
-        let setPathIncludesExplicit = new Set( config.get('preview.include.paths', [""]) );
+        let setPathIncludesExplicit = new Set<string>();
+        let strPathIncludesExplicit = strSetting('preview.include.paths', '--include-path', setPathIncludesExplicit);
         
-        let setPathIncludesWorkspace = new Set();
+        let setPathIncludesWorkspace = new Set<string>();
         if( getSetting<boolean>('preview.include.workspacePaths', false)
             && vscode.workspace.workspaceFolders )
         {
             for(var element of vscode.workspace.workspaceFolders)
             {
-                setPathIncludesWorkspace.add(element.uri.fsPath);
+                let p = new UniUri(element.uri.fsPath);
+                setPathIncludesWorkspace.add(p.pathFriendly());
             }
         }
         
@@ -317,39 +322,41 @@ class Settings
         // -----------------------------------------------------------------
         // First, check 'preview.include.path'.
         // If empty, then check 'preview.include.workspacePath' - only if not already added above.
-        let strPathInclude: string = getSetting<string>('preview.include.path', '');
+        let strPathInclude_Deprecated = strSetting( 'preview.include.path', '--include-path',
+                                                    !getSetting<boolean>('preview.include.workspacePath', false)
+                                                        ? setPathIncludesExplicit 
+                                                        : undefined );
         
-        if( (strPathInclude.length == 0)
+        if( (strPathInclude_Deprecated.length == 0)
            && getSetting<boolean>('preview.include.workspacePath', false)
            && !getSetting<boolean>('preview.include.workspacePaths', false) // Don't add if already added above!
            && vscode.workspace.workspaceFolders
           )
         {
-            setPathIncludesWorkspace.add(vscode.workspace.workspaceFolders[0].uri.fsPath);
-        }
-        else if( strPathInclude.length != 0 )
-        {
-            setPathIncludesExplicit.add(strPathInclude);
+            let p = new UniUri(vscode.workspace.workspaceFolders[0].uri.fsPath);
+            setPathIncludesWorkspace.add(p.pathFriendly());
         }
         
-        let strPathIncludesExplicit = processSetting(setPathIncludesExplicit, '--include-path', true);
-        
-        let strPathIncludesWorkspace = processSetting(setPathIncludesWorkspace, '--include-path', true);
+        // Convert the workspace set into '--include-path' option string...
+        // Note that the contents is already canonized, thus no 3rd parameter is passed.
+        let strPathIncludesWorkspace = processSetting(setPathIncludesWorkspace, '--include-path');
         
         // Read settings & build a command line from them
         // Also collect 'localResourceRoots' directories when specified.
+        let setPathSpecifiedDirectories = new Set<string>();
         this.strOptions  = strSetting('preview.strict', '--strict')
                          + strSetting('preview.noSelfLinkedHeaders', '--no-self-linked-headers')
                          + strSetting('preview.indent', '--indent')
                          + strSetting('preview.lineWidth', '--linewidth')
                          + strMacroDefine
                          + strMacroDefines
+                         + strPathInclude_Deprecated
                          + strPathIncludesExplicit
                          + strPathIncludesWorkspace
-                         + strSetting('preview.imageLocation', '--image-location', true)
-                         + strSetting('preview.boostRootPath', '--boost-root-path', true)
-                         + strSetting('preview.CSSPath', '--css-path', true)
-                         + strSetting('preview.graphicsPath', '--graphics-path', true)
+                         + strSetting('preview.imageLocation', '--image-location', setPathSpecifiedDirectories)
+                         + strSetting('preview.boostRootPath', '--boost-root-path', setPathSpecifiedDirectories)
+                         + strSetting('preview.CSSPath', '--css-path', setPathSpecifiedDirectories)
+                         + strSetting('preview.graphicsPath', '--graphics-path', setPathSpecifiedDirectories)
                          ;
         
         // Trust "Additional Directories", if allowed.
@@ -373,6 +380,7 @@ class Settings
         if(this.trustSpecifiedDirectories)
         {
             processTrustDirectory(setPathIncludesExplicit, this.localResourceRoots);
+            processTrustDirectory(setPathSpecifiedDirectories, this.localResourceRoots);
         }
         
         // Trust Workspace Directories, if allowed.
