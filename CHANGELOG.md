@@ -6,6 +6,8 @@
 )
 
 ## 0.0.5
+- Minumum version now 1.38  
+  This is to use new `webview` api functionality, as explained in https://code.visualstudio.com/updates/v1_38#_webviewaswebviewuri-and-webviewcspsource.
 - All directory paths specified in the settings are now appended with a platform specific path separator, when passed to `quickbook` executable for preview generation. (Fixed issue #5)
 - Added additional `array`-settings to allow for multiple `--include-path` (`-I`) & `--define` (`-D`) options passed to `quickbook` executable for preview generation. (Fixed issue #4)
 

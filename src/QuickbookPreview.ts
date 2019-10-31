@@ -115,6 +115,11 @@ class UniUri
     {
         return this.uri.with({ path:this.directory() });
     }
+    
+    public asWebviewUri(wv: vscode.Webview)
+    {
+        return wv.asWebviewUri(this.uri);
+    }
 };
 
 class Settings
