@@ -238,7 +238,7 @@ class Settings
                             {
                                 if(setPaths)
                                 {
-                                    setPaths.add(v);
+                                    setPaths.add(new UniUri(v.uriDirectory()));
                                 }
                                 
                                 return ' ' + option + ' "' + v.pathFriendly() + '"';
@@ -533,6 +533,16 @@ export class QuickbookPreview
                                        .uriWebviewIfPermitted(settings.processImagePathScheme)
                              + groups.post;
                     }
+                    
+                    // Tests for '<link rel="stylesheet" type="text\/css"'
+                    const regexCSS = /\<link\s+rel="stylesheet"\s+type="text\/css"/;
+                    if(regexCSS.test(groups.pre) )
+                    {
+                        return groups.pre
+                             + xUriWork.xuriPathRelativeToDestination()
+                                       .uriWebviewIfPermitted(settings.processImagePathScheme)
+                             + groups.post;
+                    }
                 }
                 else
                 {
@@ -543,6 +553,9 @@ export class QuickbookPreview
             
             const regexImageSource = /(?<pre>\<[^\>]*>\<img\s+src\s*=\s*\")(?<uri>.+?)(?<post>\".*?\>)/gs;
             contents = contents.replace(regexImageSource, replacer);
+            
+            const regexLinkCSS = /(?<pre>\<link\s+rel="stylesheet"\s+type="text\/css"\s+href=")(?<uri>.+?)(?<post>\".*?\>)/s;
+            contents = contents.replace(regexLinkCSS, replacer);
         }
         
         return contents;
