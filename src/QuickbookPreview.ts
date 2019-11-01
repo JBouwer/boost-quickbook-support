@@ -10,24 +10,34 @@ class UniUri
     public readonly uri: vscode.Uri;
     public readonly isLocal: boolean;
     
-    constructor(str: string)
+    constructor(arg: string | vscode.Uri)
     {
-        this.strPath = str;
-        let uriSetting:vscode.Uri | undefined;
-        try{
-            this.uri = vscode.Uri.parse(str, true);
-            if( ['', 'file', 'vscode-resource'].indexOf(this.uri.scheme) >= 0 )
-            {
-                this.isLocal = true;
-            }
-            else
-            {
-                this.isLocal = false;
-            }
-        } catch(err)
+        // strPath & uri
+        if(typeof(arg) == 'string')
         {
-            this.uri = vscode.Uri.file(str);
+            this.strPath = arg;
+            let uriSetting:vscode.Uri | undefined;
+            try{
+                this.uri = vscode.Uri.parse(arg, true);
+            } catch(err)
+            {
+                this.uri = vscode.Uri.file(arg);
+            }
+        }
+        else// if( arg instanceof vscode.Uri)
+        {
+            this.uri = arg;
+            this.strPath = this.uri.toString();
+        }
+        
+        // isLocal
+        if( ['', 'file', 'vscode-resource'].indexOf(this.uri.scheme) >= 0 )
+        {
             this.isLocal = true;
+        }
+        else
+        {
+            this.isLocal = false;
         }
     }
     
@@ -115,11 +125,6 @@ class UniUri
     public uriDirectory(): vscode.Uri
     {
         return this.uri.with({ path:this.directory() });
-    }
-    
-    public asWebviewUri(wv: vscode.Webview)
-    {
-        return wv.asWebviewUri(this.uri);
     }
 };
 
