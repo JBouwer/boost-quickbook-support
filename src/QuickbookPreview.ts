@@ -412,6 +412,7 @@ export class QuickbookPreview
                 <html lang="en">
                 <head>
                     <meta charset="UTF-8">
+                    <meta http-equiv="Content-Security-Policy" content="default-src 'none';">
                     <meta name="viewport" content="width=device-width, initial-scale=1.0">
                     <title>${description}</title>
                 </head>
@@ -456,41 +457,51 @@ export class QuickbookPreview
     protected processPreview(contents: string, settings: Settings, webView: vscode.Webview)
     {
         // Inject Security Policy
-        let strSecurityPolicy = `<meta http-equiv="Content-Security-Policy" content="${settings.strContentSecurityPolicy}">`;
-        const regexHead = /\<head\>(.*)\<\/head\>/;
+        let strSecurityPolicy = (settings.strContentSecurityPolicy.length != 0) 
+                            ? `<meta http-equiv="Content-Security-Policy" content="${settings.strContentSecurityPolicy}">`
+                            : `<meta http-equiv="Content-Security-Policy" content="default-src 'none';">`
+                         // : `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webView.cspSource} https:; script-src ${webView.cspSource}; style-src ${webView.cspSource};">`
+                            ;
+        
+        const regexHead = /\<head\>(.*)\<\/head\>/s;
         contents =  contents.replace(regexHead, '<head>' + strSecurityPolicy + '$1</head>');
         
+        // Update images with:
+        // 1 - Root relative paths to source file directory
+        // 2 - Access with vscode-recource:
         if(settings.processImagePathRelative || settings.processImagePathScheme)
         {
-            const regexImageSource = /(?<pre>\<span\s+class\s*=\s*\"inlinemediaobject\"\>\<img\s+src\s*=\s*\")(?<uri>.+?)(?<post>\".*?\>)/gs;
-            contents = contents.replace(regexImageSource, (match, ...args) => 
+            function replacer(match: string, ...args: any[])
+            {
+                let groups = args.pop();
+                
+                let uniUriSpecified = new UniUri(groups.uri);
+                // Only process local URI's
+                if(uniUriSpecified.isLocal)
+                {
+                    let uriWork = uniUriSpecified.uri;
+                    if(settings.processImagePathScheme)
                     {
-                        let groups = args.pop();
-                        
-                        let uniUriSpecified = new UniUri(groups.uri);
-                        // Only process local URI's
-                        if(uniUriSpecified.isLocal)
-                        {
-                            let uriWork = uniUriSpecified.uri;
-                            if(settings.processImagePathScheme)
-                            {
-                                uriWork = uriWork.with({scheme: 'vscode-resource'});
-                            }
-                            
-                            if(settings.processImagePathRelative && uniUriSpecified.isRelative())
-                            {
-                                let strPathRoot = path.dirname(settings.strPathSourceFile);
-                                uriWork = uriWork.with({ path: path.join(strPathRoot, groups.uri) });
-                            }
-                            
-                            return groups.pre + uriWork.toString()+ groups.post;
-                        }
-                        else
-                        {
-                            // Ignore
-                            return match;
-                        }
-                    });
+                        uriWork = uriWork.with({scheme: 'vscode-resource'});
+                    }
+                    
+                    if(settings.processImagePathRelative && uniUriSpecified.isRelative())
+                    {
+                        let strPathRoot = path.dirname(settings.strPathSourceFile);
+                        uriWork = uriWork.with({ path: path.join(strPathRoot, groups.uri) });
+                    }
+                    
+                    return groups.pre + uriWork.toString()+ groups.post;
+                }
+                else
+                {
+                    // Ignore
+                    return match;
+                }
+            };
+            
+            const regexImageSource = /(?<pre>\<span\s+class\s*=\s*\"inlinemediaobject\"\>\<img\s+src\s*=\s*\")(?<uri>.+?)(?<post>\".*?\>)/gs;
+            contents = contents.replace(regexImageSource, replacer);
         }
         
         return contents;
