@@ -480,23 +480,36 @@ export class QuickbookPreview
             {
                 let groups = args.pop();
                 
-                let uniUriSpecified = new UniUri(groups.uri);
-                // Only process local URI's
-                if(uniUriSpecified.isLocal)
+                class XUri extends UniUri
                 {
-                    let uriWork = uniUriSpecified.uri;
-                    if(settings.processImagePathScheme)
+                    public xuriPathRelativeToSource(isAllowed: boolean): XUri
                     {
-                        uriWork = uriWork.with({scheme: 'vscode-resource'});
+                        if(isAllowed && this.isRelative())
+                        {
+                            let strPathRoot = path.dirname(settings.strPathSourceFile);
+                            return new XUri( this.uri.with({ path: path.join(strPathRoot, groups.uri) }));
+                        }
+                        else return this;
                     }
                     
-                    if(settings.processImagePathRelative && uniUriSpecified.isRelative())
+                    public uriWebviewIfPermitted(isAllowed: boolean)
                     {
-                        let strPathRoot = path.dirname(settings.strPathSourceFile);
-                        uriWork = uriWork.with({ path: path.join(strPathRoot, groups.uri) });
+                        if(isAllowed)
+                        {
+                            return webView.asWebviewUri(this.uri);
+                        }
+                        else return this.uri;
                     }
-                    
-                    return groups.pre + uriWork.toString()+ groups.post;
+                }
+                
+                let xUriWork = new XUri(groups.uri);
+                // Only process local URI's
+                if(xUriWork.isLocal)
+                {
+                    return groups.pre
+                         + xUriWork.xuriPathRelativeToSource(settings.processImagePathRelative)
+                                   .uriWebviewIfPermitted(settings.processImagePathScheme)
+                         + groups.post;
                 }
                 else
                 {
