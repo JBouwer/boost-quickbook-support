@@ -461,6 +461,8 @@ export class QuickbookPreview
     
     protected processPreview(contents: string, settings: Settings, webView: vscode.Webview)
     {
+        let self = this;
+        
         // Inject Security Policy
         let strSecurityPolicy = (settings.strContentSecurityPolicy.length != 0) 
                             ? `<meta http-equiv="Content-Security-Policy" content="${settings.strContentSecurityPolicy}">`
@@ -492,6 +494,12 @@ export class QuickbookPreview
                         else return this;
                     }
                     
+                    public xuriPathRelativeToDestination(): XUri
+                    {
+                        let strPathRoot = path.dirname(self.strPathPreview_);
+                        return new XUri( this.uri.with({ path: path.join(strPathRoot, groups.uri) }));
+                    }
+                    
                     public uriWebviewIfPermitted(isAllowed: boolean)
                     {
                         if(isAllowed)
@@ -506,10 +514,25 @@ export class QuickbookPreview
                 // Only process local URI's
                 if(xUriWork.isLocal)
                 {
-                    return groups.pre
-                         + xUriWork.xuriPathRelativeToSource(settings.processImagePathRelative)
-                                   .uriWebviewIfPermitted(settings.processImagePathScheme)
-                         + groups.post;
+                    // Tests for '<span class="inlinemediaobject">'
+                    const regexILMediaObject = /\<span\s+class\s*=\s*\"inlinemediaobject\"\>/;
+                    if(regexILMediaObject.test(groups.pre) )
+                    {
+                        return groups.pre
+                             + xUriWork.xuriPathRelativeToSource(settings.processImagePathRelative)
+                                       .uriWebviewIfPermitted(settings.processImagePathScheme)
+                             + groups.post;
+                    }
+                    
+                    // Tests for '<a href="...">'
+                    const regexAHref = /\<a\s+href\s*=\s*\".*?\"\>/;
+                    if(regexAHref.test(groups.pre) )
+                    {
+                        return groups.pre
+                             + xUriWork.xuriPathRelativeToDestination()
+                                       .uriWebviewIfPermitted(settings.processImagePathScheme)
+                             + groups.post;
+                    }
                 }
                 else
                 {
@@ -518,7 +541,7 @@ export class QuickbookPreview
                 }
             };
             
-            const regexImageSource = /(?<pre>\<span\s+class\s*=\s*\"inlinemediaobject\"\>\<img\s+src\s*=\s*\")(?<uri>.+?)(?<post>\".*?\>)/gs;
+            const regexImageSource = /(?<pre>\<[^\>]*>\<img\s+src\s*=\s*\")(?<uri>.+?)(?<post>\".*?\>)/gs;
             contents = contents.replace(regexImageSource, replacer);
         }
         
