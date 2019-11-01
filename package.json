@@ -27,11 +27,11 @@
             "properties": {
                 "quickbook.preview.boostRootPath": {
                     "type": "string",
-                    "markdownDescription": "Path to Boost root, or absolute URL.  \nConsider to prepend the path with the `vscode-resource:` scheme.  \nPassed with `--boost-root-path` option to executable."
+                    "markdownDescription": "Path to Boost root, or absolute URL.  \nPassed with `--boost-root-path` option to executable."
                 },
                 "quickbook.preview.CSSPath": {
                     "type": "string",
-                    "markdownDescription": "Path to CSS file or absolute URL.  \nConsider to prepend the path with the `vscode-resource:` scheme.  \nPassed with `--css-path` option to executable."
+                    "markdownDescription": "Path to CSS file or absolute URL.  \nPassed with `--css-path` option to executable."
                 },
                 "quickbook.preview.defineMacro": {
                     "type": "string",
@@ -45,11 +45,11 @@
                 },
                 "quickbook.preview.graphicsPath": {
                     "type": "string",
-                    "markdownDescription": "Path to graphics directory or absolute URL.  \nConsider to prepend the path with the `vscode-resource:` scheme.  \nPassed with `--graphics-path` option to executable."
+                    "markdownDescription": "Path to graphics directory or absolute URL.  \nPassed with `--graphics-path` option to executable. This seems to default to the \"`doc/src/images/`\" subdirectory of the \"`Boost Root Path`\"."
                 },
                 "quickbook.preview.imageLocation": {
                     "type": "string",
-                    "markdownDescription": "Path to locate images.  \nConsider to prepend the path with the `vscode-resource:` scheme.  \nPassed with `--image-location` option to executable."
+                    "markdownDescription": "Path to locate images.  \nPassed with `--image-location` option to executable."
                 },
                 "quickbook.preview.include.path": {
                     "type": "string",
@@ -70,7 +70,7 @@
                 "quickbook.preview.include.workspacePaths": {
                     "type": "boolean",
                     "default": true,
-                    "markdownDescription": "Add all the _workspace paths_ as include paths. This will be passed in addition to the \"`Include Paths`\" setting above.  \n(Passed with `--include-path` option to executable.)"
+                    "markdownDescription": "Add all the _workspace paths_ as include paths.   \nPassed with `--include-path` option to executable in addition to the \"`Include Paths`\" setting above."
                 },
                 "quickbook.preview.indent": {
                     "type": [
@@ -78,12 +78,12 @@
                         "null"
                     ],
                     "default": null,
-                    "markdownDescription": "Passed with `--indent` option."
+                    "markdownDescription": "Passed with `--indent` option to executable."
                 },
                 "quickbook.preview.noSelfLinkedHeaders": {
                     "type": "boolean",
                     "default": false,
-                    "markdownDescription": "Stop headers linking to themselves. \n(Pass `--no-self-linked-headers` option)."
+                    "markdownDescription": "Stop headers linking to themselves. \n(Pass `--no-self-linked-headers` option to executable.)"
                 },
                 "quickbook.preview.lineWidth": {
                     "type": [
@@ -91,7 +91,7 @@
                         "null"
                     ],
                     "default": null,
-                    "markdownDescription": "Passed with `--linewidth` option."
+                    "markdownDescription": "Passed with `--linewidth` option to executable."
                 },
                 "quickbook.preview.pathToExecutable": {
                     "type": "string",

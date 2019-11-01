@@ -8,8 +8,17 @@
 ## 0.0.5
 - Minumum version now 1.38  
   This is to use new `webview` api functionality, as explained in https://code.visualstudio.com/updates/v1_38#_webviewaswebviewuri-and-webviewcspsource.
-- All directory paths specified in the settings are now appended with a platform specific path separator, when passed to `quickbook` executable for preview generation. (Fixed issue #5)
-- Added additional `array`-settings to allow for multiple `--include-path` (`-I`) & `--define` (`-D`) options passed to `quickbook` executable for preview generation. (Fixed issue #4)
+- Regarding _Preview_ generation:
+    - All directory paths specified in the settings are now appended with a platform specific path separator, when passed to `quickbook` executable for preview generation. (Fixed issue #5)
+    - Added additional `array`-settings to allow for multiple `--include-path` (`-I`) & `--define` (`-D`) options passed to `quickbook` executable for preview generation. (Fixed issue #4)
+    - Removed suggestions from setting-descriptions to "prepend path[s] with `vscode-resource:`" -
+      this is now implicitly done via the `asWebviewUri` call
+      (As specified by [VSCode Documentation](https://code.visualstudio.com/api/extension-guides/webview#loading-local-content)).
+    - Refined the _Content Security Policy_ processing.
+    - Refined preview resource-link post-processing;
+      _Boost_ graphics (like callouts etc.) are now more stable (fixed?).  
+      (I don't need to resort to passing a `--graphics-path "vscode-resource:/BOOST_PATH/doc/src/images/"` anymore - 
+      as reported for v 0.0.4)
 
 ## 0.0.4
 - Modified settings functionality to reload with every _preview_ operation (no more _Reload Window_ necessary).
@@ -19,7 +28,7 @@
     > - At the time of writing I needed to set my _Graphics Path_ setting to:
     > `vscode-resource:/BOOST_PATH/doc/src/images/` for Boost graphics to resolve to the correct path - setting
     > the _Boost Root Directory_ was not adequate.
-- Explicit _trusting_ of local directories for preview (See [Security](#Security) above.)
+- Explicit _trusting_ of local directories for preview (See [Security](#Security).)
 
 ## 0.0.3
 - Fixed Comments that surround template expansion (and other comment) patterns.

@@ -185,10 +185,10 @@ Image above
 
 [section Macros & images]
 
-[? __MACRO_1__ `__MACRO_1__` is defined.]
+[? __MACRO_1__ `__MACRO_`1`__` is defined: __MACRO_1__]
 [?! __MACRO_1__ `__MACRO_1__` is not defined]
 
-[? __MACRO_2__ `__MACRO_2__` is defined.]
+[? __MACRO_2__ `__MACRO_`2`__` is defined: __MACRO_2__]
 [?! __MACRO_2__ `__MACRO_2__` is not defined]
 
 [endsect]
