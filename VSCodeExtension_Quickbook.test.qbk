@@ -198,7 +198,7 @@ Footnote: [footnote A sample footnote]
 [endsect]
 
 [section Macros]
-Macro defintion:
+Macro definition:
 [def __a_macro_identifier__ Macro contents]
 __a_macro_identifier__
 

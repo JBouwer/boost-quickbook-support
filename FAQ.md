@@ -16,5 +16,6 @@
 
 1. ### I've changed a setting `XYZ`, but it does not show up in the command line or in the preview.
     
-    Remember to `Developer: Reload Window` in order to refresh the settings.  
-    This seems to work like most other extensions - but perhaps it is not necessary to do it that way?
+    Some settings will require a simple "Refresh Preview" to take effect.
+    Others - those that persist with the `VSCode WebView`, will require a `Developer: Reload Window` command
+    in order to take effect.

@@ -31,59 +31,81 @@ or explicitly specified in the `quickbook.preview.pathToExecutable` setting.
 
 ## Extension Settings
 
-The executable command options (see `quickbook --help`) are represented by equivalent *settings*. 
-Consult the [documentation](http://www.boost.org/doc/html/quickbook.html) for appropriate usage.
+- The executable's command options (see `quickbook --help`) when generating the _preview_, 
+  are represented by equivalent *settings*. 
+  Consult the [Quickbook documentation](http://www.boost.org/doc/html/quickbook.html) for appropriate usage.
 
-In addition, all filesystem paths can be specified relative to the *workspace directory*;  
-These settings are processed as follows:  
-1. The specified path is quoted and tested as is - if it exists, it is used.
-1. Otherwise the specified path is prepended in turn by each of the workspace directories - if it exists, it is used.
-1. Otherwise the specified path is used as specified.
+- __File System Paths__  
+  All filesystem path settings (i.e. to be passed as command-line options to `quickbook`, when generating the preview),
+  can be specified relative to the VSCode __workspace directories__;  
+  These settings are processed as follows:  
+  1. The specified path is quoted and tested as is - if it exists, it is used.
+  1. Otherwise the specified path is pre-pended in turn by each of the workspace directories - if it exists, it is used.
+  1. Otherwise the specified path is quoted and used as specified.
 
-Also note that to use local filesystem resources (e.g. `CSS` file, or _Boost_ directory), 
-prepend each with a `vscode-resource:` scheme;  
-e.g. `vscode-resource:/path/to/my/css_file.css`.  
+- __Local Images with a relative path__  
+  By default, the extension's preview will temporarily adjust __local relative__ image URI's 
+  (i.e. Quickbook `[$ ...]` directives with a _relative path_),
+  by rooting image paths to the directory of the source Quickbook file (i.e. the file that is being _previewed_).  
+  This can be prevented by setting the _Security: Process Image Relative_ 
+  (`quickbook.preview.security.processImagePathRelative`) setting to false.
 
-Also see [Security](#Security) below for more on this, and related settings.
+Also see [Security](#Security) below for more on these, and related settings.
 
 ## Security
-The [WebView API documentation](https://code.visualstudio.com/api/extension-guides/webview) component
-used to generate the preview panel are very restrictive with regards to what content can be displayed.
-In short:
-- Any external media needs to be explicitly _trusted_ with the _"Content Security Policy"_.
-- Local media:
-    - Needs to be accessed with a special `vscode-resource:` scheme.
-    - The scheme also needs to be explicitly _trusted_ with the _"Content Security Policy"_.
-    - The root directories that contain local media, need to be explicitly _trusted_, by adding them to 
-      [`WebviewOptions`](https://code.visualstudio.com/api/references/vscode-api#WebviewOptions)`.localResourceRoots`.
-
-See the  [WebView API documentation](https://code.visualstudio.com/api/extension-guides/webview#loading-local-content) for more on this subject.
+>   The [WebView API documentation](https://code.visualstudio.com/api/extension-guides/webview) component
+>   used to display the preview panel are very restrictive with regards to what resources can be accessed.
+>   In short:
+>   - Any external resources needs to be explicitly _trusted_ with the _"Content Security Policy"_.
+>   - Local resources:
+>       - Needs to be accessed with a special `vscode-resource:` scheme.
+>       - The scheme also needs to be explicitly _trusted_ with the _"Content Security Policy"_.
+>       - The root directories that contain local resources, need to be explicitly _trusted_, by adding them to 
+>         [`WebviewOptions`](https://code.visualstudio.com/api/references/vscode-api#WebviewOptions)`.localResourceRoots`.
+>   
+>   See the  [WebView API documentation](https://code.visualstudio.com/api/extension-guides/webview#loading-local-content) 
+>   for more on this subject.
 
 This extension provides the following features to accommodate the above requirements.
-- The "Content-Security-Policy" can be adjusted with the `quickbook.preview.security.contentSecurityPolicy` setting.  
-  The setting results into the `CSP` part of the
-  [`<meta http-equiv=\"Content-Security-Policy\" content=\"CSP\">`](https://developers.google.com/web/fundamentals/security/csp/) directive,
-  and is injected into the preview HTML, before displaying it in the `Webview`.  
-  > This setting defaults to "`vscode-resource:`" (needed to access local media).
+- __Content Security Policy__  
+  The `quickbook` generated preview HTML is injected with a
+  [`<meta http-equiv="Content-Security-Policy" content="****">`](https://developers.google.com/web/fundamentals/security/csp/) directive, where the `****` part is replaced by the contents of the _Security: Content Security Policy_ (`quickbook.preview.security.contentSecurityPolicy`) setting.  
+  > This setting defaults to "`default-src vscode-resource: https:;`" - thus allowing to access local (trusted),
+    and `https:` resources.
 
-- The extension can temporarily adjust _local_ image URI's (i.e. Quickbook `[$ ...] directives) for display in the preview:
-    - The `quickbook.preview.security.processImagePathScheme` setting (defaulting to `true`),
-      will allow the preview to temporarily adjust the scheme to "`vscode-resource:`".
-    - The `quickbook.preview.security.processImagePathRelative` setting (defaulting to `true`),
-      will allow the preview to temporarily root _relative_ image paths to the directory of the source Quickbook file
-      (i.e. the file that is being _previewed_).
+- By default, the extension's preview will temporarily adjust the scheme of all __local__ image URI's 
+  (i.e. Quickbook `[$ ...]` directives with a _local_ path) 
+  to access the image with the "`vscode-resource:`" scheme, for rendering in the preview.  
+  This can be prevented by setting the _Security: Process Image Path Scheme_ 
+  (`quickbook.preview.security.processImagePathScheme` setting to false.
 
 - The following settings will add their respective directories to the trusted list ([`WebviewOptions`](https://code.visualstudio.com/api/references/vscode-api#WebviewOptions)`.localResourceRoots`):
-    - `quickbook.preview.security.trustSourceFileDirectory`:  
+    - _Security: Trust Source File Directory_ (`quickbook.preview.security.trustSourceFileDirectory`):  
       When enabled (default), the directory of the source file (i.e. the file being previewed) is trusted.
-    - `quickbook.preview.security.trustWorkspaceDirectories`:  
+    - _Security: Trust Workspace Directories_ (`quickbook.preview.security.trustWorkspaceDirectories`):  
       When enabled (default), all of the workspace directories are trusted.
-    - `quickbook.preview.security.trustSpecifiedDirectories`:  
-      When enabled (default), any directory-paths specified in the settings above, are trusted.
-      This includes the paths specified under `quickbook.preview.`: i.e. 
-      `boostRootPath`, `CSSPath`, `graphicsPath`, `imageLocation` & `include.path/workspacePath`.
-    - `quickbook.preview.security.trustAdditionalDirectories`:  
-      An array of additional paths to trust.
+    - _Security Trust Specified Directories_ (`quickbook.preview.security.trustSpecifiedDirectories`):  
+      When enabled (default), all other setting-directory-paths are trusted;  
+      These include:
+      - _Boost Root Path_ (`quickbook.preview.boostRootPath`)
+      - _CSS Path_ (`quickbook.preview.CSSPath`)
+      - _Graphics Path_ (`quickbook.preview.graphicsPath`)
+      - _Image Location_ (`quickbook.preview.imageLocation`)
+      - _Include Paths_ (`quickbook.preview.include.path(s)`).
+    - _Trusted Additional Directories_ (`quickbook.preview.security.trustAdditionalDirectories`)  
+      A manually entered list of additional paths to trust.
+
+In addition:
+
+- __Embedded Graphics__  
+  All graphics (callouts etc.) embedded by `quickbook` into the preview html will be implicitly post-processed
+  to be accessed with the `vscode-resource:` schema.
+  This will still require the _Security Trust Specified Directories_
+  (`quickbook.preview.security.trustSpecifiedDirectories`) setting to be enabled to work - in order to trust
+  the _Boost Root_ directory.
+
+- __Stylesheet (CSS)__  
+  Any stylesheet specified with the _CSS Path_ (`quickbook.preview.CSSPath`) setting will be implicitly post-processed to be accessed with the `vscode-resource:` schema.
 
 ## Known Issues
 
@@ -107,34 +129,5 @@ Some answers to potential problems can be found [here](FAQ.md).
 
 ## Release Notes
 
-## 0.0.5
-- Minumum version now 1.38  
-  This is to use new `webview` api functionality, as explained in https://code.visualstudio.com/updates/v1_38#_webviewaswebviewuri-and-webviewcspsource.
-- All directory paths specified in the settings are now appended with a platform specific path separator, when passed to `quickbook` executable for preview generation. (Fixed issue #5)
-- Added additional `array`-settings to allow for multiple `--include-path` (`-I`) & `--define` (`-D`) options passed to `quickbook` executable for preview generation. (Fixed issue #4)
-
-### 0.0.4
-- Modified settings functionality to reload with every _preview_ operation (no more _Reload Window_ necessary).
-- Added _Content Security Policy_, (Issue #3), and associated `quickbook.preview.security.contentSecurityPolicy` setting.
-- Seemingly fixed Issue #2, with support for `CSS` file setting, support graphics & user-images.
-    > Note that:
-    > - At the time of writing I needed to set my _Graphics Path_ setting to:
-    > `vscode-resource:/BOOST_PATH/doc/src/images/` for Boost graphics to resolve to the correct path - setting
-    > the _Boost Root Directory_ was not adequate.
-- Explicit _trusting_ of local directories for preview (See [Security](#Security) above.)
-
-### 0.0.3
-- Fixed Comments that surround template expansion (and other comment) patterns.
-- Preview panel now with buttons & menu items:
-    - Refresh
-    - View Source
-    - Preview to the side
-- Command palette now ignoring invalid entries
-
-### 0.0.2
-- Minor documentation & naming issues fixed.
-
-### 0.0.1
-
-Initial release.
+The [CHANGELOG](CHANGELOG.md) will list details of what changed within each release.
 

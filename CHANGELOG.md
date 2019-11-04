@@ -19,6 +19,8 @@
       _Boost_ graphics (like callouts etc.) are now more stable (fixed?).  
       (I don't need to resort to passing a `--graphics-path "vscode-resource:/BOOST_PATH/doc/src/images/"` anymore - 
       as reported for v 0.0.4)
+    - The "`quickbook.preview.security.contentSecurityPolicy`" setting now defaults to "`default-src vscode-resource: https:;`" - thus also allowing `https:`
+      resources by default.
 
 ## 0.0.4
 - Modified settings functionality to reload with every _preview_ operation (no more _Reload Window_ necessary).
