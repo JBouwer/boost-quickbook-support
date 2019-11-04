@@ -478,6 +478,13 @@ export class QuickbookPreview
         // 2 - Access with vscode-recource:
         if(settings.processImagePathRelative || settings.processImagePathScheme)
         {
+            // REPLACER
+            // This function is to be passed to a 'string.replace(regex, replacer)' statement.
+            // It expects the REGEX to pass all matches divided into named groups:
+            //  (pre)(uri)(post)
+            // pre - includes everything identifiable about the link up to and including the uri quote (")
+            // uri - the pure URI
+            // post - from the closing quote (") to the closing (>)
             function replacer(match: string, ...args: any[])
             {
                 let groups = args.pop();
@@ -514,6 +521,7 @@ export class QuickbookPreview
                 // Only process local URI's
                 if(xUriWork.isLocal)
                 {
+                    // Filter PRE - User images:
                     // Tests for '<span class="inlinemediaobject">'
                     const regexILMediaObject = /\<span\s+class\s*=\s*\"inlinemediaobject\"\>/;
                     if(regexILMediaObject.test(groups.pre) )
@@ -524,6 +532,7 @@ export class QuickbookPreview
                              + groups.post;
                     }
                     
+                    // Filter PRE - Graphics:
                     // Tests for '<a href="...">'
                     const regexAHref = /\<a\s+href\s*=\s*\".*?\"\>/;
                     if(regexAHref.test(groups.pre) )
@@ -534,6 +543,7 @@ export class QuickbookPreview
                              + groups.post;
                     }
                     
+                    // Filter PRE - CSS (Stylesheet):
                     // Tests for '<link rel="stylesheet" type="text\/css"'
                     const regexCSS = /\<link\s+rel="stylesheet"\s+type="text\/css"/;
                     if(regexCSS.test(groups.pre) )
@@ -551,9 +561,15 @@ export class QuickbookPreview
                 }
             };
             
+            // Find Images - All of them (/g)
+            //  pre = <...><img src = "
+            //  post = "...>
             const regexImageSource = /(?<pre>\<[^\>]*>\<img\s+src\s*=\s*\")(?<uri>.+?)(?<post>\".*?\>)/gs;
             contents = contents.replace(regexImageSource, replacer);
             
+            // Find Stylesheet (CSS) - only 1st instance (no /g)
+            //  pre = <link rel="stylesheet" type="text/css" href="
+            //  post = "...>
             const regexLinkCSS = /(?<pre>\<link\s+rel="stylesheet"\s+type="text\/css"\s+href=")(?<uri>.+?)(?<post>\".*?\>)/s;
             contents = contents.replace(regexLinkCSS, replacer);
         }

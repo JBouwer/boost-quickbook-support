@@ -5,6 +5,9 @@
     Check http://keepachangelog.com for recommendations on how to structure this file.
 )
 
+## 0.0.6
+
+
 ## 0.0.5
 - Minumum version now 1.38  
   This is to use new `webview` api functionality, as explained in https://code.visualstudio.com/updates/v1_38#_webviewaswebviewuri-and-webviewcspsource.
