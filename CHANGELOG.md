@@ -6,7 +6,7 @@
 )
 
 ## 0.0.6
-
+- Catchup with graphics post-processing oversights. (Issue #9)
 
 ## 0.0.5
 - Minumum version now 1.38  

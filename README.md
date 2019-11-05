@@ -114,8 +114,8 @@ This extension is not bullet proof. It is only intended as the next step up from
 Currently it suffers from the following caveats.
 See the [GitHub Issues Page](https://github.com/JBouwer/boost-quickbook-support/issues) for more.
 
-- Bracket & Quote matching does *not* recognise escaped characters:
-e.g.  
+- ### Bracket & Quote matching does *not* recognise escaped characters:
+    e.g.  
     ```[myTemplate includes a \] character]```  
     does not match correctly on the last `]`.  
     #### Explanation
@@ -123,6 +123,30 @@ e.g.
     [bracket matching](https://code.visualstudio.com/api/language-extensions/language-configuration-guide#brackets-definition)
     is simply specified inside the `language-configuration.json` file.
     I don't know how to do specify the concept of an *escaped* character in there - if possible at all.  
+
+- ### Post-processing of preview
+    This is way out of my traditional field of expertise - 
+    so please bear with me whilst I try and catch al possibilities...
+    
+    The way it works is roughly as follows: 
+    (See `processPreview` in [`src/QuickbookPreview.ts`](https://github.com/JBouwer/boost-quickbook-support/blob/master/src/QuickbookPreview.ts))
+    1. The `quickbook` generated preview text is scanned with a suitable REGEX to find all link contenders - 
+        which are then divided into `pre`, `uri` & `post` named (regex) groups.
+    1. All of those are then further filtered to only process links that I have actually confirmed to need processing. 
+    1. Only the applicable links are then processed, and then re-assembled as:  
+        `pre + `_`processed`_`(uri) + post`
+
+    Note that:
+    1. I'm actually running blind as to _exactly what_ needs processing
+    1. I try to err on the _conservative_ side
+    
+    This will (and have) lead to some oversights.
+    
+    Don't hesitate to report any examples of `html` that I may have skipped!  
+    You can find the pre-processed `html` in the preview file that is reported with the `quickbook` 
+    command line on VSCode's _Output_ panel: Look for the `--output-file "..../out/preview.html"` option.
+    
+    I've opened Issue #9 for reporting of any such oversights.
 
 ## FAQ
 Some answers to potential problems can be found [here](FAQ.md).

@@ -535,7 +535,9 @@ export class QuickbookPreview
                     // Filter PRE - Graphics:
                     // Tests for '<a href="...">'
                     const regexAHref = /\<a\s+href\s*=\s*\".*?\"\>/;
-                    if(regexAHref.test(groups.pre) )
+                    // Tests for '<div id="...">
+                    const regexDivId = /\<div\s+id\s*=\s*\".*?\"\>/;
+                    if( regexAHref.test(groups.pre) || regexDivId.test(groups.pre) )
                     {
                         return groups.pre
                              + xUriWork.xuriPathRelativeToDestination()
@@ -564,7 +566,7 @@ export class QuickbookPreview
             // Find Images - All of them (/g)
             //  pre = <...><img src = "
             //  post = "...>
-            const regexImageSource = /(?<pre>\<[^\>]*>\<img\s+src\s*=\s*\")(?<uri>.+?)(?<post>\".*?\>)/gs;
+            const regexImageSource = /(?<pre>\<[^\>]*\>\s*?\<img\s+src\s*=\s*\")(?<uri>.+?)(?<post>\".*?\>)/gs;
             contents = contents.replace(regexImageSource, replacer);
             
             // Find Stylesheet (CSS) - only 1st instance (no /g)
