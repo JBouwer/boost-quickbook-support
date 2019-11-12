@@ -49,7 +49,7 @@
                 },
                 "quickbook.preview.imageLocation": {
                     "type": "string",
-                    "markdownDescription": "Path to locate images.  \nPassed with `--image-location` option to executable."
+                    "markdownDescription": "Path to locate images.  \nPassed with `--image-location` option to executable. On my test system this did not seem to have any effect on the generation of previews."
                 },
                 "quickbook.preview.include.path": {
                     "type": "string",
@@ -103,10 +103,25 @@
                     "default": "default-src vscode-resource: https:;",
                     "markdownDescription": "The `CSP` part of the [`<meta http-equiv=\"Content-Security-Policy\" content=\"CSP\">`](https://developers.google.com/web/fundamentals/security/csp/) directive, to be injected into the preview HTML. See also the [VSCode Webview](https://code.visualstudio.com/api/extension-guides/webview#content-security-policy) documentation for more."
                 },
+                "quickbook.preview.security.processImagePathDirectories": {
+                    "type": "array",
+                    "default": [],
+                    "markdownDescription": "Enable post-processing of local _relative_ image paths, to test each _relative_ to these directories. The first path to contain the relative image file is used."
+                },
+                "quickbook.preview.security.processImagePathIncludes": {
+                    "type": "boolean",
+                    "default": true,
+                    "markdownDescription": "Enable post-processing of local _relative_ image paths, to test each _relative_ to the explicit _Include_ directories specified above. The first path (after those specified in _Process Image Path Directories_ above) to contain the relative image file is used."
+                },
+                "quickbook.preview.security.processImagePathIncludeWorkspace": {
+                    "type": "boolean",
+                    "default": true,
+                    "markdownDescription": "Enable post-processing of local _relative_ image paths, to test each _relative_ to each of the workspace directories. The first path (after those specified in _Process Image Path Directories_ & _Process Image Path Include_ above) to contain the relative image file is used."
+                },
                 "quickbook.preview.security.processImagePathRelative": {
                     "type": "boolean",
                     "default": true,
-                    "markdownDescription": "Enable post-processing of local _relative_ image paths, to _relative_ to the output file."
+                    "markdownDescription": "Enable post-processing of local _relative_ image paths, to _relative_ to the output file. This will receive lower precedence to the other _Process Image Path_ settings above."
                 },
                 "quickbook.preview.security.processImagePathScheme": {
                     "type": "boolean",

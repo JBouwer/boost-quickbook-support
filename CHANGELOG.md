@@ -7,6 +7,9 @@
 
 ## 0.0.6
 - Catchup with graphics post-processing oversights. (Issue #9)
+- Refined image "post-processing" directories.
+  These are controlled by 3 new _Process Image Path_ settings.  
+  Also see [FAQ #5 & #6](FAQ).
 
 ## 0.0.5
 - Minumum version now 1.38  

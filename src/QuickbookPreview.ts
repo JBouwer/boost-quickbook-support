@@ -136,6 +136,13 @@ class Settings
     readonly strPathToExecutable: string;
     readonly strOptions: string;
     readonly strContentSecurityPolicy: string;
+    
+    readonly setPathIncludesExplicit: UniqueArray<UniUri>;
+    readonly setPathIncludesWorkspace: UniqueArray<UniUri>;
+    readonly setProcessImagePathDirectories: UniqueArray<UniUri>;
+    
+    readonly processImagePathIncludes: boolean;
+    readonly processImagePathIncludeWorkspace: boolean;
     readonly processImagePathRelative: boolean;
     readonly processImagePathScheme: boolean;
     
@@ -164,13 +171,28 @@ class Settings
         // Security settings
         this.strContentSecurityPolicy = getSetting<string>('preview.security.contentSecurityPolicy',
                                                            "default-src 'none';");
-        this.processImagePathRelative = getSetting<boolean>('preview.security.processImagePathRelative', false);
         this.processImagePathScheme = getSetting<boolean>('preview.security.processImagePathScheme', false);
         
         this.trustAdditionalDirectories = getSetting<string[]>('preview.security.trustAdditionalDirectories', []);
         this.trustSourceFileDirectory = getSetting<boolean>('preview.security.trustSourceFileDirectory', false);
         this.trustSpecifiedDirectories = getSetting<boolean>('preview.security.trustSpecifiedDirectories', false);
         this.trustWorkspaceDirectories = getSetting<boolean>('preview.security.trustWorkspaceDirectories', false);
+        
+        // Image settings
+        this.setProcessImagePathDirectories = new UniqueArray<UniUri>();
+        let strProcessImagePathDirectories = getSetting<string[]>('preview.security.processImagePathDirectories', []);
+        for( let folder of strProcessImagePathDirectories )
+        {
+            let test = new UniUri(folder);
+            if(test.representsDirectory())
+            {
+                this.setProcessImagePathDirectories.add(test);
+            }
+        }
+        
+        this.processImagePathIncludes = getSetting<boolean>('preview.security.processImagePathIncludes', false);
+        this.processImagePathIncludeWorkspace = getSetting<boolean>('preview.security.processImagePathIncludeWorkspace', false);
+        this.processImagePathRelative = getSetting<boolean>('preview.security.processImagePathRelative', false);
         
         // Check for existence of path - if not, try by prepending the workspace folders..
         // ... use the first one that result in a successful 'exist', otherwise use as specified.
@@ -279,16 +301,16 @@ class Settings
         // =============
         // 1 - First do the current (new) functionality:
         // --------------------------------------------
-        let setPathIncludesExplicit = new UniqueArray<UniUri>();
-        let strPathIncludesExplicit = strSetting('preview.include.paths', '--include-path', setPathIncludesExplicit);
+        this.setPathIncludesExplicit = new UniqueArray<UniUri>();
+        let strPathIncludesExplicit = strSetting('preview.include.paths', '--include-path', this.setPathIncludesExplicit);
         
-        let setPathIncludesWorkspace = new UniqueArray<UniUri>();
+        this.setPathIncludesWorkspace = new UniqueArray<UniUri>();
         if( getSetting<boolean>('preview.include.workspacePaths', false)
             && vscode.workspace.workspaceFolders )
         {
             for(var element of vscode.workspace.workspaceFolders)
             {
-                setPathIncludesWorkspace.add( new UniUri(element.uri.fsPath) );
+                this.setPathIncludesWorkspace.add( new UniUri(element.uri.fsPath) );
             }
         }
         
@@ -299,7 +321,7 @@ class Settings
         // If empty, then check 'preview.include.workspacePath' - only if not already added above.
         let strPathInclude_Deprecated = strSetting( 'preview.include.path', '--include-path',
                                                     !getSetting<boolean>('preview.include.workspacePath', false)
-                                                        ? setPathIncludesExplicit 
+                                                        ? this.setPathIncludesExplicit 
                                                         : undefined );
         
         if( (strPathInclude_Deprecated.length == 0)
@@ -308,12 +330,12 @@ class Settings
            && vscode.workspace.workspaceFolders
           )
         {
-            setPathIncludesWorkspace.add( new UniUri(vscode.workspace.workspaceFolders[0].uri.fsPath) );
+            this.setPathIncludesWorkspace.add( new UniUri(vscode.workspace.workspaceFolders[0].uri.fsPath) );
         }
         
         // Convert the workspace set into '--include-path' option string...
         // Note that the contents is already canonized, thus no 3rd parameter is passed.
-        let strPathIncludesWorkspace = processSetting(setPathIncludesWorkspace, '--include-path');
+        let strPathIncludesWorkspace = processSetting(this.setPathIncludesWorkspace, '--include-path');
         
         // Read settings & build a command line from them.
         // Also collect 'localResourceRoots' directories when specified.
@@ -353,7 +375,7 @@ class Settings
         // Trust "Specified Directories", if allowed.
         if(this.trustSpecifiedDirectories)
         {
-            for(let u of setPathIncludesExplicit)
+            for(let u of this.setPathIncludesExplicit)
             {
                 this.localResourceRoots.add(u.uri);
             }
@@ -366,7 +388,7 @@ class Settings
         // Trust Workspace Directories, if allowed.
         if(this.trustWorkspaceDirectories)
         {
-            for(let u of setPathIncludesWorkspace)
+            for(let u of this.setPathIncludesWorkspace)
             {
                 this.localResourceRoots.add(u.uriDirectory());
             }
@@ -491,6 +513,30 @@ export class QuickbookPreview
                 
                 class XUri extends UniUri
                 {
+                    public xuriPathRelativeToDirectories(isAllowed: boolean,
+                                                         setDirectories: UniqueArray<UniUri>
+                                                        ): XUri
+                    {
+                        if(isAllowed && this.isRelative())
+                        {
+                            for(let folder of setDirectories)
+                            {
+                                if(folder.representsDirectory())
+                                {
+                                    let pathTry = path.join(folder.uri.fsPath, groups.uri);
+                                    if(fs.existsSync(pathTry))
+                                    {
+                                        return new XUri( this.uri.with({ path:pathTry }) );
+                                        break;
+                                    }
+                                }
+                            }
+                            
+                            return this;
+                        }
+                        else return this;
+                    }
+                    
                     public xuriPathRelativeToSource(isAllowed: boolean): XUri
                     {
                         if(isAllowed && this.isRelative())
@@ -527,7 +573,13 @@ export class QuickbookPreview
                     if(regexILMediaObject.test(groups.pre) )
                     {
                         return groups.pre
-                             + xUriWork.xuriPathRelativeToSource(settings.processImagePathRelative)
+                             + xUriWork.xuriPathRelativeToDirectories(true,
+                                                                      settings.setProcessImagePathDirectories)
+                                       .xuriPathRelativeToDirectories(settings.processImagePathIncludes,
+                                                                      settings.setPathIncludesExplicit)
+                                       .xuriPathRelativeToDirectories(settings.processImagePathIncludeWorkspace,
+                                                                      settings.setPathIncludesWorkspace)
+                                       .xuriPathRelativeToSource(settings.processImagePathRelative)
                                        .uriWebviewIfPermitted(settings.processImagePathScheme)
                              + groups.post;
                     }
