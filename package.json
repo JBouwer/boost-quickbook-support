@@ -106,17 +106,17 @@
                 "quickbook.preview.security.processImagePathDirectories": {
                     "type": "array",
                     "default": [],
-                    "markdownDescription": "Enable post-processing of local _relative_ image paths, to test each _relative_ to these directories. The first path to contain the relative image file is used."
+                    "markdownDescription": "Enable post-processing of local _relative_ image paths, to test each _relative_ to these directories. The first path to contain the relative image file is used. All these directories are also implicitly trusted to access local resources."
                 },
                 "quickbook.preview.security.processImagePathIncludes": {
                     "type": "boolean",
                     "default": true,
-                    "markdownDescription": "Enable post-processing of local _relative_ image paths, to test each _relative_ to the explicit _Include_ directories specified above. The first path (after those specified in _Process Image Path Directories_ above) to contain the relative image file is used."
+                    "markdownDescription": "Enable post-processing of local _relative_ image paths, to test each _relative_ to the explicit _Include_ directories specified above. The first path (after those specified in _Process Image Path Directories_ above) to contain the relative image file is used. All the _Include Directories_ are also implicitly trusted to access local resources."
                 },
                 "quickbook.preview.security.processImagePathIncludeWorkspace": {
                     "type": "boolean",
                     "default": true,
-                    "markdownDescription": "Enable post-processing of local _relative_ image paths, to test each _relative_ to each of the workspace directories. The first path (after those specified in _Process Image Path Directories_ & _Process Image Path Include_ above) to contain the relative image file is used."
+                    "markdownDescription": "Enable post-processing of local _relative_ image paths, to test each _relative_ to each of the workspace directories. The first path (after those specified in _Process Image Path Directories_ & _Process Image Path Include_ above) to contain the relative image file is used. All the workspace directories are also implicitly trusted to access local resources."
                 },
                 "quickbook.preview.security.processImagePathRelative": {
                     "type": "boolean",

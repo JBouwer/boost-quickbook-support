@@ -46,7 +46,12 @@ class UniUri
     {
         if(this.isLocal)
         {
+            // This is not foolproof...
+            // - When initialised with a URI (file: schema) 'path.isAbsolute' fails!
             return !path.isAbsolute(this.strPath);
+            
+            // This won't do either - as relative uri.fsPath's start with '/'.
+            // return !path.isAbsolute(this.uri.fsPath);
         }
         else return false
     }
@@ -372,13 +377,18 @@ class Settings
             this.localResourceRoots.add(uriSourceFile.uriDirectory());
         }
         
-        // Trust "Specified Directories", if allowed.
-        if(this.trustSpecifiedDirectories)
+        // Trust "Include Directories", if allowed or if tested for images.
+        if(this.trustSpecifiedDirectories || this.processImagePathIncludes)
         {
             for(let u of this.setPathIncludesExplicit)
             {
                 this.localResourceRoots.add(u.uri);
             }
+        }
+        
+        // Trust "Specified Directories", if allowed.
+        if(this.trustSpecifiedDirectories)
+        {
             for(let u of setPathSpecifiedDirectories)
             {
                 this.localResourceRoots.add(u.uri);
@@ -386,12 +396,18 @@ class Settings
         }
         
         // Trust Workspace Directories, if allowed.
-        if(this.trustWorkspaceDirectories)
+        if(this.trustWorkspaceDirectories || this.processImagePathIncludeWorkspace)
         {
             for(let u of this.setPathIncludesWorkspace)
             {
                 this.localResourceRoots.add(u.uriDirectory());
             }
+        }
+        
+        // Trust all the setProcessImagePathDirectories.
+        for(let u of this.setProcessImagePathDirectories)
+        {
+            this.localResourceRoots.add(u.uriDirectory());
         }
     }
 };
@@ -513,11 +529,19 @@ export class QuickbookPreview
                 
                 class XUri extends UniUri
                 {
+                    protected isPathFound: boolean;
+                    
+                    constructor(arg: string | vscode.Uri, done: boolean = false)
+                    {
+                        super(arg);
+                        this.isPathFound = done;
+                    }
+                    
                     public xuriPathRelativeToDirectories(isAllowed: boolean,
                                                          setDirectories: UniqueArray<UniUri>
                                                         ): XUri
                     {
-                        if(isAllowed && this.isRelative())
+                        if(!this.isPathFound && isAllowed && this.isRelative())
                         {
                             for(let folder of setDirectories)
                             {
@@ -526,7 +550,7 @@ export class QuickbookPreview
                                     let pathTry = path.join(folder.uri.fsPath, groups.uri);
                                     if(fs.existsSync(pathTry))
                                     {
-                                        return new XUri( this.uri.with({ path:pathTry }) );
+                                        return new XUri( this.uri.with({ path:pathTry }), true );
                                         break;
                                     }
                                 }
@@ -539,18 +563,22 @@ export class QuickbookPreview
                     
                     public xuriPathRelativeToSource(isAllowed: boolean): XUri
                     {
-                        if(isAllowed && this.isRelative())
+                        if(!this.isPathFound && isAllowed && this.isRelative())
                         {
                             let strPathRoot = path.dirname(settings.strPathSourceFile);
-                            return new XUri( this.uri.with({ path: path.join(strPathRoot, groups.uri) }));
+                            return new XUri( this.uri.with({ path: path.join(strPathRoot, groups.uri) }), true);
                         }
                         else return this;
                     }
                     
                     public xuriPathRelativeToDestination(): XUri
                     {
-                        let strPathRoot = path.dirname(self.strPathPreview_);
-                        return new XUri( this.uri.with({ path: path.join(strPathRoot, groups.uri) }));
+                        if(!this.isPathFound)
+                        {
+                            let strPathRoot = path.dirname(self.strPathPreview_);
+                            return new XUri( this.uri.with({ path: path.join(strPathRoot, groups.uri) }));
+                        }
+                        else return this;
                     }
                     
                     public uriWebviewIfPermitted(isAllowed: boolean)
