@@ -185,7 +185,7 @@ class Settings
         
         // Image settings
         this.setProcessImagePathDirectories = new UniqueArray<UniUri>();
-        let strProcessImagePathDirectories = getSetting<string[]>('preview.security.processImagePathDirectories', []);
+        let strProcessImagePathDirectories = getSetting<string[]>('preview.processImagePathDirectories', []);
         for( let folder of strProcessImagePathDirectories )
         {
             let test = new UniUri(folder);
@@ -195,9 +195,13 @@ class Settings
             }
         }
         
-        this.processImagePathIncludes = getSetting<boolean>('preview.security.processImagePathIncludes', false);
-        this.processImagePathIncludeWorkspace = getSetting<boolean>('preview.security.processImagePathIncludeWorkspace', false);
-        this.processImagePathRelative = getSetting<boolean>('preview.security.processImagePathRelative', false);
+        this.processImagePathIncludes = getSetting<boolean>('preview.processImagePathIncludes', false);
+        this.processImagePathIncludeWorkspace = getSetting<boolean>('preview.processImagePathIncludeWorkspace', false);
+        
+        // The following setting was renamed, and the old one deprecated (>= v0.0.6)
+        let oldSecurityProcessPathRelative = getSetting<boolean>('preview.security.processImagePathRelative', false);
+        this.processImagePathRelative = getSetting<boolean>('preview.processImagePathRelative',
+                                                            oldSecurityProcessPathRelative);
         
         // Check for existence of path - if not, try by prepending the workspace folders..
         // ... use the first one that result in a successful 'exist', otherwise use as specified.
@@ -514,7 +518,12 @@ export class QuickbookPreview
         // Update images with:
         // 1 - Root relative paths to source file directory
         // 2 - Access with vscode-recource:
-        if(settings.processImagePathRelative || settings.processImagePathScheme)
+        if( settings.processImagePathScheme
+            || (settings.setProcessImagePathDirectories.length > 0)
+            || settings.processImagePathIncludes
+            || settings.processImagePathIncludeWorkspace
+            || settings.processImagePathRelative
+           )
         {
             // REPLACER
             // This function is to be passed to a 'string.replace(regex, replacer)' statement.

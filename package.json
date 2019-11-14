@@ -103,24 +103,30 @@
                     "default": "default-src vscode-resource: https:;",
                     "markdownDescription": "The `CSP` part of the [`<meta http-equiv=\"Content-Security-Policy\" content=\"CSP\">`](https://developers.google.com/web/fundamentals/security/csp/) directive, to be injected into the preview HTML. See also the [VSCode Webview](https://code.visualstudio.com/api/extension-guides/webview#content-security-policy) documentation for more."
                 },
-                "quickbook.preview.security.processImagePathDirectories": {
+                "quickbook.preview.processImagePathDirectories": {
                     "type": "array",
                     "default": [],
                     "markdownDescription": "Enable post-processing of local _relative_ image paths, to test each _relative_ to these directories. The first path to contain the relative image file is used. All these directories are also implicitly trusted to access local resources."
                 },
-                "quickbook.preview.security.processImagePathIncludes": {
+                "quickbook.preview.processImagePathIncludes": {
                     "type": "boolean",
                     "default": true,
                     "markdownDescription": "Enable post-processing of local _relative_ image paths, to test each _relative_ to the explicit _Include_ directories specified above. The first path (after those specified in _Process Image Path Directories_ above) to contain the relative image file is used. All the _Include Directories_ are also implicitly trusted to access local resources."
                 },
-                "quickbook.preview.security.processImagePathIncludeWorkspace": {
+                "quickbook.preview.processImagePathIncludeWorkspace": {
                     "type": "boolean",
                     "default": true,
                     "markdownDescription": "Enable post-processing of local _relative_ image paths, to test each _relative_ to each of the workspace directories. The first path (after those specified in _Process Image Path Directories_ & _Process Image Path Include_ above) to contain the relative image file is used. All the workspace directories are also implicitly trusted to access local resources."
                 },
+                "quickbook.preview.processImagePathRelative": {
+                    "type": "boolean",
+                    "default": true,
+                    "markdownDescription": "Enable post-processing of local _relative_ image paths, to _relative_ to the output file. This will receive lower precedence to the other _Process Image Path_ settings above."
+                },
                 "quickbook.preview.security.processImagePathRelative": {
                     "type": "boolean",
                     "default": true,
+                    "deprecationMessage": "This property name is deprecated, and may be removed in a future version. It was renamed to \"`Process Image Path Relative`\" (without \"`Security`\") above.",
                     "markdownDescription": "Enable post-processing of local _relative_ image paths, to _relative_ to the output file. This will receive lower precedence to the other _Process Image Path_ settings above."
                 },
                 "quickbook.preview.security.processImagePathScheme": {

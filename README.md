@@ -46,11 +46,18 @@ or explicitly specified in the `quickbook.preview.pathToExecutable` setting.
 - __Local Images with a relative path__  
   By default, the extension's preview will temporarily adjust __local relative__ image URI's 
   (i.e. Quickbook `[$ ...]` directives with a _relative path_),
-  by rooting image paths to the directory of the source Quickbook file (i.e. the file that is being _previewed_).  
-  This can be prevented by setting the _Security: Process Image Relative_ 
-  (`quickbook.preview.security.processImagePathRelative`) setting to false.
+  by rooting image paths to the directory where the image may actually be found.  
+  (See [FAQ #5 & #6](FAQ) for rationale.)  
+  These directories are are searched in the following order, and can be included/excluded from the search:
+  Directory | Setting Heading | Setting Name
+  ----------|-----------------|-------------
+  Explicit image directories|_"Process Image Path Directories"_|`quickbook.preview.processImagePathDirectories`
+  Include directories specified with _"Include Paths"_ (`quickbook.preview.include.path`)|_"Process Image Path Includes"_|`quickbook.preview.processImagePathIncludes`
+  Workspace directories|"Process Image Path Include Workspace"|`quickbook.preview.processImagePathIncludeWorkspace`
+  The directory of the source Quickbook file (i.e. the file that is being _previewed_). |"Process Image Path Relative"|`quickbook.preview.processImagePathRelative`
 
-Also see [Security](#Security) below for more on these, and related settings.
+All the above directories, when enabled, are also implicitly _trusted_ to access local resources.
+See [Security](#Security) below for more.
 
 ## Security
 >   The [WebView API documentation](https://code.visualstudio.com/api/extension-guides/webview) component
@@ -60,7 +67,8 @@ Also see [Security](#Security) below for more on these, and related settings.
 >   - Local resources:
 >       - Needs to be accessed with a special `vscode-resource:` scheme.
 >       - The scheme also needs to be explicitly _trusted_ with the _"Content Security Policy"_.
->       - The root directories that contain local resources, need to be explicitly _trusted_, by adding them to 
+>       - The root directories that contain local resources, need to be explicitly _trusted_,
+>         by adding them to the _trusted list_
 >         [`WebviewOptions`](https://code.visualstudio.com/api/references/vscode-api#WebviewOptions)`.localResourceRoots`.
 >   
 >   See the  [WebView API documentation](https://code.visualstudio.com/api/extension-guides/webview#loading-local-content) 
@@ -79,7 +87,10 @@ This extension provides the following features to accommodate the above requirem
   This can be prevented by setting the _Security: Process Image Path Scheme_ 
   (`quickbook.preview.security.processImagePathScheme` setting to false.
 
-- The following settings will add their respective directories to the trusted list ([`WebviewOptions`](https://code.visualstudio.com/api/references/vscode-api#WebviewOptions)`.localResourceRoots`):
+- All of the directories that are searched for images (See __Local Images with a relative path__ above),
+  are implicitly added to the _trusted list_.
+
+- The following settings will add their respective directories to the _trusted list_ ([`WebviewOptions`](https://code.visualstudio.com/api/references/vscode-api#WebviewOptions)`.localResourceRoots`):
     - _Security: Trust Source File Directory_ (`quickbook.preview.security.trustSourceFileDirectory`):  
       When enabled (default), the directory of the source file (i.e. the file being previewed) is trusted.
     - _Security: Trust Workspace Directories_ (`quickbook.preview.security.trustWorkspaceDirectories`):  

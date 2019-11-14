@@ -30,7 +30,7 @@
 
 5. ### Why does the "Preview" functionality need so many settings - in addition to those used by the `quickbook` executable?
     
-    See also [#5](#5) above.  
+    See also [#5](FAQ) above.  
     In order to prepare the preview as close as possible to the finished product, the
     extension do some post-processing on the `quickbook` preview output - 
     hence the many settings.
