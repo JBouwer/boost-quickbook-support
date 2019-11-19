@@ -49,6 +49,7 @@ or explicitly specified in the `quickbook.preview.pathToExecutable` setting.
   by rooting image paths to the directory where the image may actually be found.  
   (See [FAQ #5 & #6](FAQ) for rationale.)  
   These directories are are searched in the following order, and can be included/excluded from the search:
+  
   Directory | Setting Heading | Setting Name
   ----------|-----------------|-------------
   Explicit image directories|_"Process Image Path Directories"_|`quickbook.preview.processImagePathDirectories`
