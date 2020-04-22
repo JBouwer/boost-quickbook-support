@@ -5,6 +5,12 @@
     Check http://keepachangelog.com for recommendations on how to structure this file.
 )
 
+## 0.0.7
+- Migrated to `@types/vscode`, dropped legacy `vscode` package;
+  - Amongst others it resolved the following security vulnerabilities:
+    - CVE-2020-7598 High severity
+    - WS-2019-0310 Moderate severity
+
 ## 0.0.6
 - Catchup with graphics post-processing oversights. (Issue #9)
 - Refined image "post-processing" directories.
